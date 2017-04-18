@@ -5,8 +5,10 @@
 
 ###
 # movement:
+# speed2powerLeft(v)
+# speed2powerRight(v)
 # enc_diff(init_count, current_count)
-# translate(distance, motor_L, motor_R) #TODO: single motor power setting
+# translate(distance, vel)
 # rotate(angle, motor_L, motor_R) #TODO: single motor power setting
 
 ###
