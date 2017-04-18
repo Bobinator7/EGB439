@@ -60,6 +60,17 @@ def enc_diff(init_count, current_count):
         return_count = (half_res - current_count) + (init_count + half_res) 
     return return_count
 
+def toPoint(xTarget, yTarget, vel):
+    Kv = 1
+    Kh = 1
+    xCurrent = 0
+    yCurrent = 0
+    thetaCurrent = 0 
+    thetaTarget = math.atan((yTarget - yCurrent)/(xTarget - xCurrent))
+    velAv = Kv*sqrt((xTarget-xCurrent)**2 + (yTarget-xCurrent)**2)
+    velDiff = Kh*(thetaTarget - thetaCurrent)
+     
+
 def translate(distance, vel):
     motor_L = speed2powerLeft(vel)
     motor_R = speed2powerRight(vel)
