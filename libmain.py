@@ -39,6 +39,14 @@ motor_L = -p
 motor_R = -p
 error = 4
 
+def speed2powerLeft(v):
+    power = round(v * (-122.00) - 16.75) #-113.6363 -16.75
+    return power
+
+def speed2powerRight(v):
+    power = round(v * (-116.6512) - 16.65)
+    return power
+
 def enc_diff(init_count, current_count):
     half_res = 15360
     full_res = 30720
@@ -50,7 +58,10 @@ def enc_diff(init_count, current_count):
         return_count = (half_res - current_count) + (init_count + half_res) 
     return return_count
 
-def translate(distance, motor_L, motor_R):
+def translate(distance, vel):
+    motor_L = speed2powerLeft(vel)
+    motor_R = speed2powerRight(vel)
+    
     ticks_translate = distance*(360/(3.14*wheel_dia))
     tick_diffT = 0
     countA_tot = 0
