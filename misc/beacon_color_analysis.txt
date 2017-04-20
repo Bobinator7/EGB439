@@ -16,12 +16,11 @@ color examples:
   HSV[217 41 28]    BGR[71 53 42]   (note: shadowy part, left beacon)
   HSV[240 34 39]    BGR[99 65 65]
   HSV[283 34 24]    BGR[61 40 55]   (note: shadowy part, right beacon)
-  
   "floor green":
   HSV[119 55 36]    BGR[43 93 42]   (note: front green)
   HSV[124 52 43]    BGR[53 110 57]  (note: bright floor)
   HSV[102 55 29]    BGR[33 73 45]   (note: dark background)
-  
+
 - sample 287 (far, centre, non moving):
   "beacon red":
   HSV[11 69 27]     BGR[21 30 68]   (note: left)
@@ -37,13 +36,12 @@ color examples:
   HSV[140 14 17]    BGR[39 43 37]   (note: left edge)
   HSV[311 34 24]    BGR[57 40 61]   (note: right middle)
   HSV[322 42 25]    BGR[54 37 64]   (note: blur right, blue to red)
-  
-  "floor green"
+  "floor green":
   HSV[119 54 39]    BGR[46 100 47]  (note: front green)
   HSV[121 53 45]    BGR[56 116 55]  (note: bright floor)
   HSV[125 63 28]    BGR[31 72 27]   (note: dark background)
   HSV[99 48 19]     BGR[25 48 33]   (note: between beacons)
-  
+
 - sample 196 (very close and near, moving):
   "beacon red":
   HSV[359 90 31]    BGR[9 8 80]

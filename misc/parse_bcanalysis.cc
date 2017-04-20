@@ -4,6 +4,31 @@ using namespace std;
 
 int main(int argc, char **argv) {
   
+  string str;
+
+  while (getline(cin,str)) {
+    if (str[0] == '-') {
+      int flag = 0;		//flag sets which list to add to
+      str.clear();
+      while (getline(cin,str) && !str.empty()) {
+
+	//cout << str << endl;
+        if (str.find("beacon red") != string::npos) {
+          cout << "red values coming up!" << endl;
+	} else if (str.find("beacon green") != string::npos) {
+          cout << "green values coming up!" << endl;
+	} else if (str.find("beacon blue") != string::npos) {
+	  cout << "blue values coming up!" << endl;
+	} else if (str.find("floor green") != string::npos) {
+	  cout << "green floor values coming up!" << endl;
+	} else {
+          cout << "parse HSV and BGR values" << endl;
+	}
+
+	str.clear();
+      }
+    }
+  }
   //get first sample line
   
   //get color type (skip after BGR squared bracket)
