@@ -8,6 +8,7 @@ import io
 
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 ## conversion from/to raw data
 wheel_dia = 0.065
@@ -63,11 +64,15 @@ xCurrent = 0
 yCurrent = 0
 thetaCurrent = 0
 
-def toPoint(xTarget, yTarget):
+def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
+    
+    plt.axis([-5,5,-5,5])
+    plt.ion()
+    
     ## control params
-    Kv = 1
-    Kh = 1
-    goal_tolerance = 0.5
+    Kv = 0.5
+    Kh = 1.1
+    goal_tolerance = 0.01
 
     #TODO: loop until target is within a tolerance
     t1 = t2 = v = w = 0.0
@@ -81,22 +86,42 @@ def toPoint(xTarget, yTarget):
         thetaCurrent = thetaCurrent + delta_th
         t1 = t2
 
+
         ## break if goal is reached
         if ((xCurrent-xTarget)**2 + (yCurrent-yTarget)**2 < goal_tolerance):
             break
 
         ## angle to target (not pose angle!)
-        thetaTarget = math.atan2((yTarget - yCurrent)/(xTarget - xCurrent))
+        thetaTarget = math.atan2((yTarget - yCurrent),(xTarget - xCurrent))
 
         ## calculate desired motion speeds
-        velAv = Kv * sqrt((xTarget-xCurrent)**2 + (yTarget-yCurrent)**2)        #offset due to min robot speed
+        velAv = Kv * math.sqrt((xTarget-xCurrent)**2 + (yTarget-yCurrent)**2)        #offset due to min robot speed
         velDiff = Kh * (thetaTarget - thetaCurrent)
         vL = velAv - velDiff/2
         vR = velAv + velDiff/2
+        
+        print(thetaTarget)
+        print(thetaCurrent)
 
         ## set motor settings
         #mA.set_power(speed2powerLeft(vL))
         #mB.set_power(speed2powerRight(vR))
 
         v, w = velAv, velDiff       #only for simulation
+        
+        plt.scatter(xCurrent,yCurrent)
+        plt.show()
 
+        time.sleep(0.1)
+        #print(xCurrent)
+        #print(yCurrent)
+
+if __name__ == '__main__':
+    
+    fig=plt.figure()
+        
+    toPoint(2,3, xCurrent, yCurrent, thetaCurrent)
+    
+    
+    input()
+    
