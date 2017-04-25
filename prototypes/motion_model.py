@@ -66,12 +66,12 @@ thetaCurrent = 0
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
-    plt.axis([-5,5,-5,5])
+    plt.axis([-10,10,-10,10])
     plt.ion()
     
     ## control params
     Kv = 0.5
-    Kh = 1.1
+    Kh = 2
     goal_tolerance = 0.01
 
     #TODO: loop until target is within a tolerance
@@ -115,12 +115,20 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         time.sleep(0.1)
         #print(xCurrent)
         #print(yCurrent)
+        
+    return xCurrent, yCurrent, thetaCurrent
 
 if __name__ == '__main__':
     
     fig=plt.figure()
         
-    toPoint(2,3, xCurrent, yCurrent, thetaCurrent)
+    xCurrent, yCurrent, thetaCurrent = toPoint(2,3, xCurrent, yCurrent, thetaCurrent)
+    xCurrent, yCurrent, thetaCurrent = toPoint(-4,-4, xCurrent, yCurrent, thetaCurrent)
+    xCurrent, yCurrent, thetaCurrent = toPoint(-5,3, xCurrent, yCurrent, thetaCurrent)
+    xCurrent, yCurrent, thetaCurrent = toPoint(4,4, xCurrent, yCurrent, thetaCurrent)
+    xCurrent, yCurrent, thetaCurrent = toPoint(4,-4, xCurrent, yCurrent, thetaCurrent)
+    
+
     
     
     input()
