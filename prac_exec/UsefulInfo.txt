@@ -1,0 +1,4 @@
+yellow_dot_dia = 9.5 < x < 10 cm
+height_color_band_beacon = 11.5 cm
+width_color_band_beacon = 4.5 cm
+Arena = 202x202cm
