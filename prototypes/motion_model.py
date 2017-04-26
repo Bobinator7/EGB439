@@ -66,8 +66,7 @@ thetaCurrent = 0
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
-    plt.axis([-10,10,-10,10])
-    plt.ion()
+    plt.axis([0,5,0,5])
     
     ## control params
     Kv = 0.7
@@ -109,12 +108,19 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
         v, w = velAv, velDiff       #only for simulation
         
-        plt.scatter(xCurrent,yCurrent,marker=(3,0,180*thetaCurrent/np.pi+270),s=100)
+        #plt.scatter(xCurrent,yCurrent,marker=(3,2,180*thetaCurrent/np.pi+270),s=100)
+        arrow_size = 0.1
+        dx = arrow_size * math.cos(thetaCurrent)
+        dy = arrow_size * math.sin(thetaCurrent)
+        plt.arrow(xCurrent,yCurrent,dx,dy,width=0.003)
 
         time.sleep(0.1)
         #print(xCurrent)
         #print(yCurrent)
         
+    plt.show()
+    input()
+
     return xCurrent, yCurrent, thetaCurrent
 
 if __name__ == '__main__':
@@ -122,14 +128,8 @@ if __name__ == '__main__':
     fig=plt.figure()
         
     xCurrent, yCurrent, thetaCurrent = toPoint(2,3, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(-4,-4, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(-5,3, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(4,4, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(4,-4, xCurrent, yCurrent, thetaCurrent)
-    
-
-    
-    plt.show()
-    
-    input()
+    #xCurrent, yCurrent, thetaCurrent = toPoint(-4,-4, xCurrent, yCurrent, thetaCurrent)
+    #xCurrent, yCurrent, thetaCurrent = toPoint(-5,3, xCurrent, yCurrent, thetaCurrent)
+    #xCurrent, yCurrent, thetaCurrent = toPoint(4,4, xCurrent, yCurrent, thetaCurrent)
+    #xCurrent, yCurrent, thetaCurrent = toPoint(4,-4, xCurrent, yCurrent, thetaCurrent)
     
