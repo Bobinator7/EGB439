@@ -109,10 +109,12 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         v, w = velAv, velDiff       #only for simulation
         
         #plt.scatter(xCurrent,yCurrent,marker=(3,2,180*thetaCurrent/np.pi+270),s=100)
-        arrow_size = 0.1
+        arrow_size = 0.05
         dx = arrow_size * math.cos(thetaCurrent)
         dy = arrow_size * math.sin(thetaCurrent)
-        plt.arrow(xCurrent,yCurrent,dx,dy,width=0.003)
+        #plt.arrow(xCurrent,yCurrent,dx,dy,width=0.003)
+        plt.plot([xCurrent,xCurrent+dx],[yCurrent,yCurrent+dy],color='r',linewidth=3)
+        plt.plot([xCurrent,xCurrent-dy],[yCurrent,yCurrent+dx],color='b',linewidth=3)
 
         time.sleep(0.1)
         #print(xCurrent)
