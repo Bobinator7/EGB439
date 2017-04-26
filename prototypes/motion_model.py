@@ -70,7 +70,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     plt.ion()
     
     ## control params
-    Kv = 0.5
+    Kv = 0.7
     Kh = 2
     goal_tolerance = 0.01
 
@@ -109,8 +109,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
         v, w = velAv, velDiff       #only for simulation
         
-        plt.scatter(xCurrent,yCurrent)
-        plt.show()
+        plt.scatter(xCurrent,yCurrent,marker=(3,0,180*thetaCurrent/np.pi+270),s=100)
 
         time.sleep(0.1)
         #print(xCurrent)
@@ -130,6 +129,7 @@ if __name__ == '__main__':
     
 
     
+    plt.show()
     
     input()
     
