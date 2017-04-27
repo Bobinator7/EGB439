@@ -85,7 +85,7 @@ def getGoalPosPixel(img):#(image_path):
 
     keypoints = detector_goaly.detect(mask)
 
-    obj_pix = keypoints[0].size * 0.0000001783235294117647
+    obj_pix = keypoints[0].size * 0.0000001583235294117647
     print(keypoints[0].size)
     focal = 3.04/1000
     obj_real = 0.09
@@ -150,12 +150,13 @@ thetaCurrent = 0
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
-    plt.axis([0,5,0,5])
+    plt.axis([-1.5,1.5,-1.5,1.5])
     #plt.ion()
+    plt.plot(xTarget,-yTarget,marker='*',color='r')
     
     ## control params
     Kv = 0.7 #0.7 
-    Kh = 2.0 #0.5
+    Kh = 1.0 #0.5
     goal_tolerance = 0.1
 
     #TODO: loop until target is within a tolerance
@@ -190,14 +191,14 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         vR = velAv + velDiff/2
         #print(vL)
         #print(vR)
-        if vL > 0.7:
-            vL = 0.65
-        if vR > 0.73:
-            vR = 0.65
-        if vL < -0.7:
-            vL = -0.65
-        if vR< -0.73:
-            vR = -0.7
+        if vL > 0.5:
+            vL = 0.5
+        if vR > 0.5:
+            vR = 0.5
+        if vL < -0.5:
+            vL = -0.5
+        if vR< -0.5:
+            vR = -0.5
 
         #print(thetaTarget)
         #print(thetaCurrent)
@@ -209,8 +210,8 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         arrow_size = 0.05
         dx = arrow_size * math.cos(thetaCurrent)
         dy = arrow_size * math.sin(thetaCurrent)
-        plt.plot([xCurrent,xCurrent+dx],[yCurrent,yCurrent+dy],color='r',linewidth=3)
-        plt.plot([xCurrent,xCurrent-dy],[yCurrent,yCurrent+dx],color='b',linewidth=3)
+        plt.plot([xCurrent,xCurrent+dx],[-yCurrent,-(yCurrent+dy)],color='r',linewidth=3)
+        plt.plot([xCurrent,xCurrent-dy],[-yCurrent,-(yCurrent+dx)],color='b',linewidth=3)
         
         time.sleep(0.1)
         print('---------')
