@@ -66,7 +66,7 @@ thetaCurrent = 0
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
-    plt.axis([-10,10,-10,10])
+    plt.axis([0,4,0,4])
     plt.ion()
     
     ## control params
@@ -79,7 +79,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
     while(True):
         ## calculate current configuration
-        t2 = time.time(); tL2 = mA.get_ticks(); tR2 = mB.get_ticks()
+        t2 = time.time(); #tL2 = mA.get_ticks(); tR2 = mB.get_ticks()
         delta_d, delta_th = get_motion_sim(v,w,t2-t1) ## For simulation
         #delta_d, delta_th = get_motion(tL2,tL1,tR2,tR1) ## On Robot
     
@@ -87,7 +87,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         yCurrent = yCurrent + delta_d * math.sin(thetaCurrent)
         thetaCurrent = thetaCurrent + delta_th
         delta_t = t2 - t1
-        t1 = t2 ; tL1 = mA.get_ticks(); tR1 = mB.get_ticks()
+        t1 = t2 ; #tL1 = mA.get_ticks(); tR1 = mB.get_ticks()
 
 
         ## break if goal is reached
@@ -112,12 +112,20 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
         v, w = velAv, velDiff       #only for simulation
         
-        plt.scatter(xCurrent,yCurrent,marker=(3,0,180*thetaCurrent/np.pi+270),s=100)
+        arrow_size = 0.05
+        dx = arrow_size * math.cos(thetaCurrent)
+        dy = arrow_size * math.sin(thetaCurrent)
+        #plt.arrow(xCurrent,yCurrent,dx,dy,width=0.003)
+        plt.plot([xCurrent,xCurrent+dx],[yCurrent,yCurrent+dy],color='r',linewidth=3)
+        plt.plot([xCurrent,xCurrent-dy],[yCurrent,yCurrent+dx],color='b',linewidth=3)
 
         time.sleep(0.1)
         #print(xCurrent)
         #print(yCurrent)
         
+    plt.show()
+    input()
+    
     return xCurrent, yCurrent, thetaCurrent
 
 if __name__ == '__main__':
@@ -125,14 +133,5 @@ if __name__ == '__main__':
     fig=plt.figure()
         
     xCurrent, yCurrent, thetaCurrent = toPoint(2,3, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(-4,-4, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(-5,3, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(4,4, xCurrent, yCurrent, thetaCurrent)
-    xCurrent, yCurrent, thetaCurrent = toPoint(4,-4, xCurrent, yCurrent, thetaCurrent)
     
 
-    
-    plt.show()
-    
-    input()
-    

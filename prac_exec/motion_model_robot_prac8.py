@@ -8,7 +8,7 @@ import picamera.array
 
 import cv2
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 ppi.init()
 mA = ppi.Motor(ppi.AD_MOTOR_A)
@@ -150,7 +150,7 @@ thetaCurrent = 0
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
-    #plt.axis([-10,10,-10,10])
+    plt.axis([0,5,0,5])
     #plt.ion()
     
     ## control params
@@ -206,6 +206,12 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         mA.set_power(speed2powerLeft(vL))
         mB.set_power(speed2powerRight(vR))
         
+        arrow_size = 0.05
+        dx = arrow_size * math.cos(thetaCurrent)
+        dy = arrow_size * math.sin(thetaCurrent)
+        plt.plot([xCurrent,xCurrent+dx],[yCurrent,yCurrent+dy],color='r',linewidth=3)
+        plt.plot([xCurrent,xCurrent-dy],[yCurrent,yCurrent+dx],color='b',linewidth=3)
+        
         time.sleep(0.1)
         print('---------')
         print('vL = '+str(vL))
@@ -219,6 +225,10 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     print('done')   
     mA.set_power(0)
     mB.set_power(0)
+    
+    plt.show()
+    input()
+    
     return xCurrent, yCurrent, thetaCurrent
 
 if __name__ == '__main__':
