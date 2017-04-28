@@ -9,6 +9,7 @@ import io
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.io as sio
 
 ## conversion from/to raw data
 wheel_dia = 0.065
@@ -17,6 +18,14 @@ p = 45
 motor_L = -p
 motor_R = -p
 error = 4
+
+## import simulation data.mat
+data = iso.loadmat('data.mat')
+mp = data['map']
+odom = data['odom']
+xr = data['xr']
+sensor = data['sensor']
+
 
 def speed2powerLeft(v):
     power = round(v * (-122.00) - 16.75) #-113.6363 -16.75
@@ -63,6 +72,12 @@ def get_motion(tL2,tL1,tR2,tR1):
 xCurrent = 0
 yCurrent = 0
 thetaCurrent = 0
+
+def localiser(delta_t):
+    data = sio.loadmat('data.mat')
+    A = np.array([[1,0,delta_t,0],[0,1,0,delta_t],[0,0,1,0],[0,0,0,1]])
+    B = np.array([[(delta_t**2)/2, 0],[0,(delta_t**2)/2],[delta_t,0],[0,delta_t]])
+    return
 
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
@@ -127,6 +142,8 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     input()
     
     return xCurrent, yCurrent, thetaCurrent
+
+
 
 if __name__ == '__main__':
     
