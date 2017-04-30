@@ -20,12 +20,43 @@ motor_R = -p
 error = 4
 
 ## import simulation data.mat
-data = iso.loadmat('data.mat')
+data = sio.loadmat('data.mat')
 mp = data['map']
 odom = data['odom']
-xr = data['xr']
+X = np.transpose(data['xr'])
+X = X[2:np.size(X),:]
 sensor = data['sensor']
+num_z = np.size(mp)
 
+## import goals, beacons, starting position
+## [id, x, y, 0]
+items = sio.loadmat('map.mat')
+robotInitPos = items['map'][0]
+goal1 = items['map'][1]
+goal2 = items['map'][2]
+beacon27 = items['map'][3]
+beacon29 = items['map'][4]
+beacon38 = items['map'][5]
+beacon45 = items['map'][6]
+beacon57 = items['map'][7]
+
+def ask_the_oracle(X,k):
+    ## x is the pose of the robot at time step k
+    return x = np.transpose(X(k,:))
+
+def get_odom(odom, k):
+    delta_d = odom(k,0)
+    delta_th = odom(k,1)
+    return delta_d, delta_th
+
+def get_map(mp):
+    return mp
+
+def sense(sensor,num_z,k):
+    ## Get sensor data at time step k
+    idx = 1 + (k-1)*num_z
+    z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly.
+    return z   
 
 def speed2powerLeft(v):
     power = round(v * (-122.00) - 16.75) #-113.6363 -16.75
@@ -133,7 +164,9 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         #plt.arrow(xCurrent,yCurrent,dx,dy,width=0.003)
         plt.plot([xCurrent,xCurrent+dx],[yCurrent,yCurrent+dy],color='r',linewidth=3)
         plt.plot([xCurrent,xCurrent-dy],[yCurrent,yCurrent+dx],color='b',linewidth=3)
-
+        plt.plot(goal1[1],goal1[2],color='g',linewidth=3)
+    
+        plt.plot([3.25,3.25],[3.75,3.75],color='g',linewidth=3)
         time.sleep(0.1)
         #print(xCurrent)
         #print(yCurrent)
@@ -150,5 +183,8 @@ if __name__ == '__main__':
     fig=plt.figure()
         
     xCurrent, yCurrent, thetaCurrent = toPoint(1,2, xCurrent, yCurrent, thetaCurrent)
-    
+    for k in range(1, 50):
+        delta_d, delta_theta = get_odom(odom, k)    
+        z = sense(sensor, num_z, k)
+        
 
