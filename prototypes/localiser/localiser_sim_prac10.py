@@ -199,14 +199,14 @@ if __name__ == '__main__':
     propXY = 1
     deltaT = 1
     ## Kalman - matricies
-    A = np.array([1 0 deltaT 0],[0 1 0 deltaT],[0 0 1 0],[0 0 0 1])
-    B = np.array([(deltaT**2)/2 0],[0 (deltaT**2)/2],[deltaT 0],[0 deltaT]) 
-    H = np.array([1 0 0 0],[0 1 0 0])
-    R = np.array([sigmaV 0 0 0],[0 sigmaV 0 0],[0 0 sigmaV**2],[0 0 0 sigmaV**2])
-    Q = np.array([sigmaW**2 0],[0 sigmaW**2])
+    A = np.array([1, 0, deltaT, 0],[0, 1, 0, deltaT],[0, 0, 1, 0],[0, 0, 0, 1]) ## TODO: Figure out way these matricies aren't accepted
+    B = np.array([(deltaT**2)/2, 0],[0, (deltaT**2)/2],[deltaT, 0],[0, deltaT]) 
+    H = np.array([1, 0, 0, 0],[0, 1, 0, 0])
+    R = np.array([sigmaV, 0, 0, 0],[0, sigmaV, 0, 0],[0, 0, sigmaV**2, 0],[0, 0, 0, sigmaV**2])
+    Q = np.array([sigmaW**2, 0],[0, sigmaW**2])
     ## Kalman - initiliaze
     x = 0; y = 0; vx = 0; vy = 0; theta = 0
-    cov = np.array([sigmaX**2 propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY sigmaY**2])
+    cov = np.array([sigmaX**2, propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY, sigmaY**2])
     X = np.array([0],[0],[0],[0])
     I = np.eye(4)
 
@@ -226,7 +226,7 @@ if __name__ == '__main__':
         X = X + K(Z - H*X) ## TODO: convert Z from range, bearing to x,y of robots position
         cov = (I-K*H)*cov
     ## Kalman - finnish
-   
+        XEst[k] = X 
         thetaCurrent = thetaCurrent + delta_theta
         xCurrent = xCurrent + delta_d*math.cos(thetaCurrent)
         yCurrent = yCurrent + delta_d*math.sin(thetaCurrent)
@@ -260,7 +260,8 @@ if __name__ == '__main__':
         
         #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)
     plt.plot(mp[:,0],mp[:,1],'x',color='r')
-    plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
+    #plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
+    plt.plot(XEst[:,0], XEst[:,1],'x',color='b')
     plt.show()
     input()
     #print(x_true)
