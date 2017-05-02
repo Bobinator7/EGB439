@@ -42,11 +42,12 @@ beacon57 = items['map'][7]
 
 def ask_the_oracle(X,k):
     ## x is the pose of the robot at time step k
-    return x = np.transpose(X(k,:))
+    x = np.transpose(X[k,:])
+    return x 
 
 def get_odom(odom, k):
-    delta_d = odom(k,0)
-    delta_th = odom(k,1)
+    delta_d = odom[k,0]
+    delta_th = odom[k,1]
     return delta_d, delta_th
 
 def get_map(mp):
@@ -132,6 +133,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         xCurrent = xCurrent + delta_d * math.cos(thetaCurrent)
         yCurrent = yCurrent + delta_d * math.sin(thetaCurrent)
         thetaCurrent = thetaCurrent + delta_th
+        thetaCurrent = thetaCurrent + delta_th
         delta_t = t2 - t1
         t1 = t2 ; #tL1 = mA.get_ticks(); tR1 = mB.get_ticks()
 
@@ -182,9 +184,50 @@ if __name__ == '__main__':
     
     fig=plt.figure()
         
-    xCurrent, yCurrent, thetaCurrent = toPoint(1,2, xCurrent, yCurrent, thetaCurrent)
-    for k in range(1, 50):
+    #xCurrent, yCurrent, thetaCurrent = toPoint(1,2, xCurrent, yCurrent, thetaCurrent)
+    ## Initialize variables
+    pEstMatrix = np.zeros((50,4))
+    thetaPast = xPast = yPast = vxPast = vyPast = 0
+    thetaCurrent = xCurrent = yCurrent = 0
+    for k in range(0, 49):
         delta_d, delta_theta = get_odom(odom, k)    
-        z = sense(sensor, num_z, k)
         
+        thetaCurrent = thetaCurrent + delta_theta
+        xCurrent = xCurrent + delta_d*math.cos(thetaCurrent)
+        yCurrent = yCurrent + delta_d*math.sin(thetaCurrent)
+        
+        ## Assume delta_t (time step) to be 1. 
+        controlInput = np.array([xPast+vxPast,yPast+vyPast,xCurrent-xPast,yCurrent-yPast])
+        pPastEst = np.array([xPast,yPast,vxPast,vyPast])
+        
+        pEst = pPastEst + controlInput
+        
+        ## For plotting
+        pEstMatrix[k,:] = pEst[:]
+        
+        ## Pass current values to past variables
+        thetaPast = thetaCurrent
+        xPast = xCurrent
+        yPast = yCurrent
 
+         
+        z = sense(sensor, num_z, k)
+        x_true = ask_the_oracle(X,k)
+        print('--------------')
+        print('True pos: '+ str(x_true[0])+','+str(x_true[1]))
+        print('Estimate pos: '+ str(pEst[0])+','+str(pEst[1]))
+        
+        ## plot x_true
+        arrow_size = 0.05
+        dx = arrow_size*math.cos(x_true[0])
+        dy = arrow_size*math.sin(x_true[1])
+        plt.plot([x_true[0],x_true[0]+dx],[x_true[1],x_true[1]+dy],color='g',linewidth=3)
+        
+        #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)
+    plt.plot(mp[:,0],mp[:,1],'x',color='r')
+    plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
+    plt.show()
+    input()
+    #print(x_true)
+    #print(pEst)    
+    print('done')
