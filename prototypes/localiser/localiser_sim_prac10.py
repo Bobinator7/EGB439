@@ -186,12 +186,47 @@ if __name__ == '__main__':
         
     #xCurrent, yCurrent, thetaCurrent = toPoint(1,2, xCurrent, yCurrent, thetaCurrent)
     ## Initialize variables
+    Ez = 0.01 ## Measurement error
+    C = np.array([1, 1, 1, 1])
     pEstMatrix = np.zeros((50,4))
     thetaPast = xPast = yPast = vxPast = vyPast = 0
     thetaCurrent = xCurrent = yCurrent = 0
+    ## Kalman - coefs
+    sigmaW = 0.5
+    sigmaV = 0.001
+    sigmaY = sigmaX = 0.1
+    sigmaZ = 0.01
+    propXY = 1
+    deltaT = 1
+    ## Kalman - matricies
+    A = np.array([1 0 deltaT 0],[0 1 0 deltaT],[0 0 1 0],[0 0 0 1])
+    B = np.array([(deltaT**2)/2 0],[0 (deltaT**2)/2],[deltaT 0],[0 deltaT]) 
+    H = np.array([1 0 0 0],[0 1 0 0])
+    R = np.array([sigmaV 0 0 0],[0 sigmaV 0 0],[0 0 sigmaV**2],[0 0 0 sigmaV**2])
+    Q = np.array([sigmaW**2 0],[0 sigmaW**2])
+    ## Kalman - initiliaze
+    x = 0; y = 0; vx = 0; vy = 0; theta = 0
+    cov = np.array([sigmaX**2 propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY sigmaY**2])
+    X = np.array([0],[0],[0],[0])
+    I = np.eye(4)
+
+
     for k in range(0, 49):
-        delta_d, delta_theta = get_odom(odom, k)    
-        
+    ## Data given
+        delta_d, delta_theta = get_odom(odom, k)     
+        Z = sense(sensor, num_z, k)
+
+        U = np.array([x+delta_d*math.cos(delta_theta+theta)],[y+delta_d*math.sine(delta_theta+theta)],[delta_d*math.cos(delta_theta+theta)/deltaT],[delta_d*math.sine(delta_theta+theta)])
+    ## Kalman - start
+        ## Predict
+        X = A*X + B*U      
+        cov = A*cov*np.transpose(A)+R
+        ## Update
+        K = cov*np.transpose(H)/(H*cov*np.tranpose(H)+Q)
+        X = X + K(Z - H*X) ## TODO: convert Z from range, bearing to x,y of robots position
+        cov = (I-K*H)*cov
+    ## Kalman - finnish
+   
         thetaCurrent = thetaCurrent + delta_theta
         xCurrent = xCurrent + delta_d*math.cos(thetaCurrent)
         yCurrent = yCurrent + delta_d*math.sin(thetaCurrent)
@@ -209,14 +244,14 @@ if __name__ == '__main__':
         thetaPast = thetaCurrent
         xPast = xCurrent
         yPast = yCurrent
-
-         
-        z = sense(sensor, num_z, k)
+        
+        K = pEst*C/(C*pEst*np.transpose(C)+Ez)
+        #pUpdate = pEst + K()
         x_true = ask_the_oracle(X,k)
         print('--------------')
         print('True pos: '+ str(x_true[0])+','+str(x_true[1]))
         print('Estimate pos: '+ str(pEst[0])+','+str(pEst[1]))
-        
+        print('Kalman Gain:'+str(K))
         ## plot x_true
         arrow_size = 0.05
         dx = arrow_size*math.cos(x_true[0])
