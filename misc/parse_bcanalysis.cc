@@ -13,10 +13,10 @@ int main(int argc, char **argv) {
   smatch sm_hsv, sm_bgr;
 
   //TODO: typedef or c++11 equivalent for readability
-  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,int,int>>> beacon_blue;
-  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,int,int>>> beacon_green;
-  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,int,int>>> beacon_red;
-  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,int,int>>> floor_green;
+  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,float,float>>> beacon_blue;
+  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,float,float>>> beacon_green;
+  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,float,float>>> beacon_red;
+  list<tuple<tuple<int,int,int>,tuple<int,int,int>,tuple<int,float,float>>> floor_green;
 
   while (getline(cin,str)) {
     if (str[0] == '-') {
@@ -48,13 +48,13 @@ int main(int argc, char **argv) {
 	    int r = stoi(sm_bgr[3].str());
 	    //cout << b << g << r << endl;
 	    if (flag == 1) {
-	      beacon_red.push_back(make_pair(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
+	      beacon_red.push_back(make_tuple(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
 	    } else if (flag == 2) {
-	      beacon_green.push_back(make_pair(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
+	      beacon_green.push_back(make_tuple(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
 	    } else if (flag == 3) {
-	      beacon_blue.push_back(make_pair(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
+	      beacon_blue.push_back(make_tuple(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
 	    } else if (flag == 4) {
-	      floor_green.push_back(make_pair(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
+	      floor_green.push_back(make_tuple(make_tuple(h,s,v),make_tuple(b,g,r),make_tuple(0,0,0)));
 	    }
 
 	  } else {
@@ -67,9 +67,44 @@ int main(int argc, char **argv) {
     }
   }
   
+  //cout << "calculate luminance and chromaticity in form (y,cr,cg)"
   for (auto it : beacon_red) {
-    //cout << get<0>(it.first) << endl;
+    //cout << get<0>(get<0>(it)) << endl;
+    int y = get<0>(get<1>(it)) + get<1>(get<1>(it)) + get<2>(get<1>(it));
+    float cr = (float)get<2>(get<1>(it)) / (float)y;
+    float cg = (float)get<1>(get<1>(it)) / (float)y;
+    get<2>(it) = make_tuple(y,cr,cg);
+    cout << y << ", " << cr << ", " << cg << endl;
+  }
+  cout << "-" << endl;
 
+  for (auto it : beacon_green) {
+    //cout << get<0>(get<0>(it)) << endl;
+    int y = get<0>(get<1>(it)) + get<1>(get<1>(it)) + get<2>(get<1>(it));
+    float cr = (float)get<2>(get<1>(it)) / (float)y;
+    float cg = (float)get<1>(get<1>(it)) / (float)y;
+    get<2>(it) = make_tuple(y,cr,cg);
+    cout << y << ", " << cr << ", " << cg << endl;
+  }
+  cout << "-" << endl;
+
+  for (auto it : beacon_blue) {
+    //cout << get<0>(get<0>(it)) << endl;
+    int y = get<0>(get<1>(it)) + get<1>(get<1>(it)) + get<2>(get<1>(it));
+    float cr = (float)get<2>(get<1>(it)) / (float)y;
+    float cg = (float)get<1>(get<1>(it)) / (float)y;
+    get<2>(it) = make_tuple(y,cr,cg);
+    cout << y << ", " << cr << ", " << cg << endl;
+  }
+  cout << "-" << endl;
+
+  for (auto it : floor_green) {
+    //cout << get<0>(get<0>(it)) << endl;
+    int y = get<0>(get<1>(it)) + get<1>(get<1>(it)) + get<2>(get<1>(it));
+    float cr = (float)get<2>(get<1>(it)) / (float)y;
+    float cg = (float)get<1>(get<1>(it)) / (float)y;
+    get<2>(it) = make_tuple(y,cr,cg);
+    cout << y << ", " << cr << ", " << cg << endl;
   }
 
   //process color information 
