@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     float cr = (float)get<2>(get<1>(it)) / (float)y;
     float cg = (float)get<1>(get<1>(it)) / (float)y;
     get<2>(it) = make_tuple(y,cr,cg);
-    cout << y << ", " << cr << ", " << cg << endl;
+    cout << y << ", " << cr << ", " << cg << ", " << 1-cr-cg << endl;
   }
   cout << "-" << endl;
 
