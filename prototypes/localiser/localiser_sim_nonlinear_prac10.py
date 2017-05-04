@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
+from numpy.linalg import inv
 
 ## conversion from/to raw data
 wheel_dia = 0.065
@@ -23,10 +24,10 @@ error = 4
 data = sio.loadmat('data.mat')
 mp = data['map']
 odom = data['odom']
-X = np.transpose(data['xr'])
-X = X[2:np.size(X),:]
+xT = np.transpose(data['xr'])
+xT = xT[2:np.size(xT),:]
 sensor = data['sensor']
-num_z = np.size(mp)
+num_z = mp.shape[0]
 
 ## import goals, beacons, starting position
 ## [id, x, y, 0]
@@ -40,10 +41,10 @@ beacon38 = items['map'][5]
 beacon45 = items['map'][6]
 beacon57 = items['map'][7]
 
-def ask_the_oracle(X,k):
+def ask_the_oracle(xT,k):
     ## x is the pose of the robot at time step k
-    x = np.transpose(X[k,:])
-    return x 
+    xTrue = np.transpose(xT[k,:])
+    return xTrue 
 
 def get_odom(odom, k):
     delta_d = odom[k,0]
@@ -55,9 +56,9 @@ def get_map(mp):
 
 def sense(sensor,num_z,k):
     ## Get sensor data at time step k
-    idx = 1 + (k-1)*num_z
-    z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly.
-    Z = np.transpose(np.asmatrix(z)) ## 2x1 matrix
+    #idx = 1 + (k-1)*num_z
+    #z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly. 
+    Z = np.transpose(sensor) ## 2x1 matrix
     return Z   
 
 def speed2powerLeft(v):
@@ -185,34 +186,30 @@ if __name__ == '__main__':
     
     fig=plt.figure()       
     
-    ## Initialize variables
-    Ez = 0.01 ## Measurement error
-    C = np.matrix([1, 1, 1, 1])
-    pEstMatrix = np.zeros((50,4))
-    thetaPast = xPast = yPast = vxPast = vyPast = 0
-    thetaCurrent = xCurrent = yCurrent = 0
     ## Kalman - coefs
-    sigmaW = 0.5
-    sigmaV = 0.001
-    sigmaY = sigmaX = 0.1
-    sigmaZ = 0.01
-    sigmaTheta = 0.01
-    propXY = 1
+    sigmaW = 0
+    sigmaV = 0
+    sigmaY = sigmaX = 0
+    sigmaZ = 0
+    sigmaTheta = 0
+    #propXY = 1
     deltaT = 1
+    
     ## Kalman - matricies
     #A = np.matrix([[1, 0, deltaT, 0],[0, 1, 0, deltaT],[0, 0, 1, 0],[0, 0, 0, 1]]) 
     #B = np.matrix([[(deltaT**2)/2, 0],[0, (deltaT**2)/2],[deltaT, 0],[0, deltaT]]) 
-    H = np.matrix([[0],[0]]) ## range and bearing to landmarks based on sensor data.    
+    #H = np.matrix([[0],[0]]) ## range and bearing to landmarks based on sensor data.    
     R = np.matrix([[sigmaV**2, 0],[0,sigmaV**2]])
     Q = np.matrix([[sigmaW**2, 0],[0, sigmaW**2]])
     #G = np.matrix([[0,0,0],[0,0,0]])
     #Jx = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
     #Ju = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
+    
     ## Kalman - initiliaze
     x = 0; y = 0; theta = 0
     #cov = np.matrix([[sigmaX**2, propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY, sigmaY**2]])
     cov = np.eye(3) ## 3x3
-    X = np.matrix([[0],[0],[0]]) ## X = [[x],[y],[theta]], 3x1  
+    #X = np.matrix([[0],[0],[0]]) ## X = [[x],[y],[theta]], 3x1  
     I = np.eye(3) ## 3x3
 
     for k in range(0, 49):
@@ -234,57 +231,44 @@ if __name__ == '__main__':
         ## Predict cov
         cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju) 
       ## Update
-        for i in range(0,6):
+        for i in range(0,5):
             ## Calculate G
-            G = np.matrix([[(-mp[i,0]*math.cos(mp[i,1])-U[0,0])/mp[i,0], (-mp[i,0]*math.sin(mp[i,1])-U[1,0])/mp[i,0], 0 ],[(-mp[i,0]*math.sin(mp[i,1])-U[1,0])/(mp[i,0]**2), (-mp[i,0]*math.cos(mp[i,1])-U[0,0])/(mp[i,0]**2),-1]) ## 2x3
+            G = np.matrix([[(-mp[i,0]*math.cos(mp[i,1])-X[0,0])/mp[i,0], (-mp[i,0]*math.sin(mp[i,1])-X[1,0])/mp[i,0], 0 ],[(-mp[i,0]*math.sin(mp[i,1])-X[1,0])/(mp[i,0]**2), (-mp[i,0]*math.cos(mp[i,1])-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
+            print('G:'+str(G))
             ## Calculate K
-            K = cov*np.transpose(G)/(G*cov*np.tranpose(G)+Q) ## 3x2
+            K = cov*np.transpose(G)*inv(G*cov*np.transpose(G)+Q) ## 3x2
             ## Calculate H
-            H = np.matrix([[math.sqrt((U[0,0]-mp[i,0])**2+(U[1,0]-mp[i,1])**2],[math.atan2(mp[i,1]-U[1,0],mp[i,0]-U(0,0)-U[2,0])]])  ## 2x1
+            H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0]-X[2,0])]])  ## 2x1 ## TODO: May not be calculated correctly
             ## Update X 
-            X = X + K(Z[:,i] - H)
+            error = (np.transpose(np.asmatrix(Z[:,i])) - H)
+            X = X + K*error
+            print(H)
+            print(np.transpose(np.asmatrix(Z[:,i])))
             ## Update cov 
-            cov = (I-K*G)*cov 
+            cov = (I-K*G)*cov
+            print('K:'+str(K))
+      
     ## Kalman - finish
         
-        XEst[k] = X 
-        thetaCurrent = thetaCurrent + delta_theta
-        xCurrent = xCurrent + delta_d*math.cos(thetaCurrent)
-        yCurrent = yCurrent + delta_d*math.sin(thetaCurrent)
-        
-        ## Assume delta_t (time step) to be 1. 
-        controlInput = np.matrix([xPast+vxPast,yPast+vyPast,xCurrent-xPast,yCurrent-yPast])
-        pPastEst = np.matrix([xPast,yPast,vxPast,vyPast])
-        
-        pEst = pPastEst + controlInput
-        
-        ## For plotting
-        pEstMatrix[k,:] = pEst[:]
-        
-        ## Pass current values to past variables
-        thetaPast = thetaCurrent
-        xPast = xCurrent
-        yPast = yCurrent
-        
-        K = pEst*C/(C*pEst*np.transpose(C)+Ez)
-        #pUpdate = pEst + K()
-        x_true = ask_the_oracle(X,k)
+        xTrue = ask_the_oracle(xT,k)
         print('--------------')
-        print('True pos: '+ str(x_true[0])+','+str(x_true[1]))
-        print('Estimate pos: '+ str(pEst[0])+','+str(pEst[1]))
-        print('Kalman Gain:'+str(K))
+        print('True pos: '+ str(xTrue[0])+','+str(xTrue[1]))
+        print('Estimate pos: '+ str(X))
+        #print('Estimate pos: '+ str(X[0,0])+','+str(X[1,0]))
+        #print('Kalman Gain:'+str(K))
+        #print('Kalman Gain:'+str(K))
         ## plot x_true
-        arrow_size = 0.05
-        dx = arrow_size*math.cos(x_true[0])
-        dy = arrow_size*math.sin(x_true[1])
-        plt.plot([x_true[0],x_true[0]+dx],[x_true[1],x_true[1]+dy],color='g',linewidth=3)
+        #arrow_size = 0.05
+        #dx = arrow_size*math.cos(x_true[0])
+        #dy = arrow_size*math.sin(x_true[1])
+        #plt.plot(x_true[0],x_true[1],'x',color='g')
         
         #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)
-    plt.plot(mp[:,0],mp[:,1],'x',color='r')
+    #plt.plot(mp[:,0],mp[:,1],'x',color='r')
     #plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
-    plt.plot(XEst[:,0], XEst[:,1],'x',color='b')
-    plt.show()
-    input()
+    #plt.plot(XEst[:,0], XEst[:,1],'x',color='b')
+    #plt.show()
+    #input()
     #print(x_true)
     #print(pEst)    
     print('done')
