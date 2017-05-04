@@ -57,7 +57,8 @@ def sense(sensor,num_z,k):
     ## Get sensor data at time step k
     idx = 1 + (k-1)*num_z
     z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly.
-    return z   
+    Z = np.transpose(np.asmatrix(z)) ## 2x1 matrix
+    return Z   
 
 def speed2powerLeft(v):
     power = round(v * (-122.00) - 16.75) #-113.6363 -16.75
@@ -182,12 +183,11 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
 if __name__ == '__main__':
     
-    fig=plt.figure()
-        
-    #xCurrent, yCurrent, thetaCurrent = toPoint(1,2, xCurrent, yCurrent, thetaCurrent)
+    fig=plt.figure()       
+    
     ## Initialize variables
     Ez = 0.01 ## Measurement error
-    C = np.array([1, 1, 1, 1])
+    C = np.matrix([1, 1, 1, 1])
     pEstMatrix = np.zeros((50,4))
     thetaPast = xPast = yPast = vxPast = vyPast = 0
     thetaCurrent = xCurrent = yCurrent = 0
@@ -196,44 +196,65 @@ if __name__ == '__main__':
     sigmaV = 0.001
     sigmaY = sigmaX = 0.1
     sigmaZ = 0.01
+    sigmaTheta = 0.01
     propXY = 1
     deltaT = 1
     ## Kalman - matricies
-    A = np.array([[1, 0, deltaT, 0],[0, 1, 0, deltaT],[0, 0, 1, 0],[0, 0, 0, 1]]) 
-    B = np.array([[(deltaT**2)/2, 0],[0, (deltaT**2)/2],[deltaT, 0],[0, deltaT]]) 
-    H = np.array([[1, 0, 0, 0],[0, 1, 0, 0]])
-    R = np.array([[sigmaV, 0, 0, 0],[0, sigmaV, 0, 0],[0, 0, sigmaV**2, 0],[0, 0, 0, sigmaV**2]])
-    Q = np.array([[sigmaW**2, 0],[0, sigmaW**2]])
+    #A = np.matrix([[1, 0, deltaT, 0],[0, 1, 0, deltaT],[0, 0, 1, 0],[0, 0, 0, 1]]) 
+    #B = np.matrix([[(deltaT**2)/2, 0],[0, (deltaT**2)/2],[deltaT, 0],[0, deltaT]]) 
+    H = np.matrix([[0],[0]]) ## range and bearing to landmarks based on sensor data.    
+    R = np.matrix([[sigmaV**2, 0],[0,sigmaV**2]])
+    Q = np.matrix([[sigmaW**2, 0],[0, sigmaW**2]])
+    #G = np.matrix([[0,0,0],[0,0,0]])
+    #Jx = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
+    #Ju = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
     ## Kalman - initiliaze
-    x = 0; y = 0; vx = 0; vy = 0; theta = 0
-    cov = np.array([[sigmaX**2, propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY, sigmaY**2]])
-    X = np.array([[0],[0],[0],[0]])
-    I = np.eye(4)
-
+    x = 0; y = 0; theta = 0
+    #cov = np.matrix([[sigmaX**2, propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY, sigmaY**2]])
+    cov = np.eye(3) ## 3x3
+    X = np.matrix([[0],[0],[0]]) ## X = [[x],[y],[theta]], 3x1  
+    I = np.eye(3) ## 3x3
 
     for k in range(0, 49):
     ## Data given
+        ## Get odometry data
         delta_d, delta_theta = get_odom(odom, k)     
-        Z = sense(sensor, num_z, k)
-
-        U = np.array([[x+delta_d*math.cos(delta_theta+theta)],[y+delta_d*math.sin(delta_theta+theta)],[delta_d*math.cos(delta_theta+theta)/deltaT],[delta_d*math.sin(delta_theta+theta)]])
+        ## Get sensor data
+        Z = sense(sensor, num_z, k) ## True range and bearing to landmarks. 2x1
     ## Kalman - start
-        # Predicts
-        X = A*X + B*U      
-        cov = A*cov*np.transpose(A)+R
-        ## Update
-        K = cov*np.transpose(H)/(H*cov*np.tranpose(H)+Q)
-        X = X + K(Z - H*X) ## TODO: convert Z from range, bearing to x,y of robots position
-        cov = (I-K*H)*cov
-    ## Kalman - finnish
+      ## Predicts
+        ## Predict X
+        X = np.matrix([[x+delta_d*math.cos(theta)],[y+delta_d*math.sin(theta)],[theta]]) ## 3x1
+        ## Calculate Theta
+        theta = theta + delta_theta
+        ## Calculate Jx
+        Jx = np.matrix([[1,0,-delta_d*math.sin(theta)],[0,1,delta_d*math.sin(theta)],[0,0,1]]) ## 3x2
+        ## Calculate Ju
+        Ju = np.matrix([[math.cos(theta),0],[math.sin(theta),0],[0,1]]) ## 3x3
+        ## Predict cov
+        cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju) 
+      ## Update
+        for i in range(0,6):
+            ## Calculate G
+            G = np.matrix([[(-mp[i,0]*math.cos(mp[i,1])-U[0,0])/mp[i,0], (-mp[i,0]*math.sin(mp[i,1])-U[1,0])/mp[i,0], 0 ],[(-mp[i,0]*math.sin(mp[i,1])-U[1,0])/(mp[i,0]**2), (-mp[i,0]*math.cos(mp[i,1])-U[0,0])/(mp[i,0]**2),-1]) ## 2x3
+            ## Calculate K
+            K = cov*np.transpose(G)/(G*cov*np.tranpose(G)+Q) ## 3x2
+            ## Calculate H
+            H = np.matrix([[math.sqrt((U[0,0]-mp[i,0])**2+(U[1,0]-mp[i,1])**2],[math.atan2(mp[i,1]-U[1,0],mp[i,0]-U(0,0)-U[2,0])]])  ## 2x1
+            ## Update X 
+            X = X + K(Z[:,i] - H)
+            ## Update cov 
+            cov = (I-K*G)*cov 
+    ## Kalman - finish
+        
         XEst[k] = X 
         thetaCurrent = thetaCurrent + delta_theta
         xCurrent = xCurrent + delta_d*math.cos(thetaCurrent)
         yCurrent = yCurrent + delta_d*math.sin(thetaCurrent)
         
         ## Assume delta_t (time step) to be 1. 
-        controlInput = np.array([xPast+vxPast,yPast+vyPast,xCurrent-xPast,yCurrent-yPast])
-        pPastEst = np.array([xPast,yPast,vxPast,vyPast])
+        controlInput = np.matrix([xPast+vxPast,yPast+vyPast,xCurrent-xPast,yCurrent-yPast])
+        pPastEst = np.matrix([xPast,yPast,vxPast,vyPast])
         
         pEst = pPastEst + controlInput
         
