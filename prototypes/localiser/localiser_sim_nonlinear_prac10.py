@@ -56,9 +56,9 @@ def get_map(mp):
 
 def sense(sensor,num_z,k):
     ## Get sensor data at time step k
-    #idx = 1 + (k-1)*num_z
-    #z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly. 
-    Z = np.transpose(sensor) ## 2x1 matrix
+    idx = 1 + (k-1)*num_z
+    z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly. 
+    Z = np.transpose(z) ## 2x1 matrix
     return Z   
 
 def speed2powerLeft(v):
@@ -187,29 +187,16 @@ if __name__ == '__main__':
     fig=plt.figure()       
     
     ## Kalman - coefs
-    sigmaW = 0
+    sigmaW = 1
     sigmaV = 0
-    sigmaY = sigmaX = 0
-    sigmaZ = 0
-    sigmaTheta = 0
-    #propXY = 1
     deltaT = 1
     
-    ## Kalman - matricies
-    #A = np.matrix([[1, 0, deltaT, 0],[0, 1, 0, deltaT],[0, 0, 1, 0],[0, 0, 0, 1]]) 
-    #B = np.matrix([[(deltaT**2)/2, 0],[0, (deltaT**2)/2],[deltaT, 0],[0, deltaT]]) 
-    #H = np.matrix([[0],[0]]) ## range and bearing to landmarks based on sensor data.    
     R = np.matrix([[sigmaV**2, 0],[0,sigmaV**2]])
     Q = np.matrix([[sigmaW**2, 0],[0, sigmaW**2]])
-    #G = np.matrix([[0,0,0],[0,0,0]])
-    #Jx = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
-    #Ju = np.matrix([[0,0,0],[0,0,0],[0,0,0]])
     
     ## Kalman - initiliaze
-    x = 0; y = 0; theta = 0
-    #cov = np.matrix([[sigmaX**2, propXY*sigmaX*sigmaY],[propXY*sigmaX*sigmaY, sigmaY**2]])
+    X = np.matrix([[0],[0],[0]])
     cov = np.eye(3) ## 3x3
-    #X = np.matrix([[0],[0],[0]]) ## X = [[x],[y],[theta]], 3x1  
     I = np.eye(3) ## 3x3
 
     for k in range(0, 49):
@@ -217,33 +204,42 @@ if __name__ == '__main__':
         ## Get odometry data
         delta_d, delta_theta = get_odom(odom, k)     
         ## Get sensor data
-        Z = sense(sensor, num_z, k) ## True range and bearing to landmarks. 2x1
+        Z = sense(sensor, num_z, k+1) ## True range and bearing to landmarks. 2x1
     ## Kalman - start
       ## Predicts
         ## Predict X
-        X = np.matrix([[x+delta_d*math.cos(theta)],[y+delta_d*math.sin(theta)],[theta]]) ## 3x1
+        X = X + np.matrix([[delta_d*math.cos(X[2,0])],[delta_d*math.sin(X[2,0])],[delta_theta]]) ## 3x1
+        print(X)
         ## Calculate Theta
-        theta = theta + delta_theta
+        theta = X[2,0]
         ## Calculate Jx
         Jx = np.matrix([[1,0,-delta_d*math.sin(theta)],[0,1,delta_d*math.sin(theta)],[0,0,1]]) ## 3x2
         ## Calculate Ju
         Ju = np.matrix([[math.cos(theta),0],[math.sin(theta),0],[0,1]]) ## 3x3
+        #print(Jx)
+        #print(Ju)
         ## Predict cov
         cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju) 
+        print(cov)
       ## Update
-        for i in range(0,5):
+        for i in range(0,5,5):
             ## Calculate G
-            G = np.matrix([[(-mp[i,0]*math.cos(mp[i,1])-X[0,0])/mp[i,0], (-mp[i,0]*math.sin(mp[i,1])-X[1,0])/mp[i,0], 0 ],[(-mp[i,0]*math.sin(mp[i,1])-X[1,0])/(mp[i,0]**2), (-mp[i,0]*math.cos(mp[i,1])-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
-            print('G:'+str(G))
+            G = np.matrix([[-(mp[i,0]*math.cos(mp[i,1])-X[0,0])/mp[i,0], -(mp[i,0]*math.sin(mp[i,1])-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*math.sin(mp[i,1])-X[1,0])/(mp[i,0]**2), -(mp[i,0]*math.cos(mp[i,1])-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
+            #print('G:'+str(G))
             ## Calculate K
             K = cov*np.transpose(G)*inv(G*cov*np.transpose(G)+Q) ## 3x2
             ## Calculate H
-            H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0]-X[2,0])]])  ## 2x1 ## TODO: May not be calculated correctly
+            H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0])-X[2,0]]])  ## 2x1 ## TODO: May not be calculated correctly
             ## Update X 
             error = (np.transpose(np.asmatrix(Z[:,i])) - H)
+            print('Z:'+str(Z[:,i]))
+            print('H:'+str(H))
+            print('error:'+str(error))
+            dx = K*error
+            print('K*error'+str(dx))
             X = X + K*error
-            print(H)
-            print(np.transpose(np.asmatrix(Z[:,i])))
+            #print(H)
+            #print(np.transpose(np.asmatrix(Z[:,i])))
             ## Update cov 
             cov = (I-K*G)*cov
             print('K:'+str(K))
