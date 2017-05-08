@@ -229,11 +229,11 @@ def getBeaconIDs(img):
     frame_tolerance = 10
     detector = cv2.SimpleBlobDetector_create(params)
     thb = cv2.cvtColor(thb, cv2.COLOR_GRAY2BGR)
-    keypointsb = detector.detect(thb)
-    keypointsb = [i for i in keypointsb if int(round(i.pt[0])) >= frame_tolerance]
-    keypointsb = [i for i in keypointsb if int(round(i.pt[1])) >= frame_tolerance]
-    keypointsb = [i for i in keypointsb if int(round(i.pt[0])) < thb.shape[1] - frame_tolerance]
-    keypointsb = [i for i in keypointsb if int(round(i.pt[1])) < thb.shape[0] - frame_tolerance]
+    br = detector.detect(thb)
+    br = [i for i in br if int(round(i.pt[0])) >= frame_tolerance]
+    br = [i for i in br if int(round(i.pt[1])) >= frame_tolerance]
+    br = [i for i in br if int(round(i.pt[0])) < thb.shape[1] - frame_tolerance]
+    br = [i for i in br if int(round(i.pt[1])) < thb.shape[0] - frame_tolerance]
     
     detector = cv2.SimpleBlobDetector_create(params)
     thg = cv2.cvtColor(thg, cv2.COLOR_GRAY2BGR)
@@ -258,7 +258,7 @@ def getBeaconIDs(img):
 #    cv2.waitKey(0)
 
     kp_list = []
-    for it in keypointsb:
+    for it in br:
         kp_list.append([it.pt[0], it.pt[1], 3, it.size])
         
     for it in keypointsg:

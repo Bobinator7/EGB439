@@ -25,7 +25,7 @@ data = sio.loadmat('data.mat')
 mp = data['map']
 odom = data['odom']
 xT = np.transpose(data['xr'])
-xT = xT[2:np.size(xT),:]
+xT = xT[1:np.size(xT),:]
 sensor = data['sensor']
 num_z = mp.shape[0]
 
@@ -56,8 +56,8 @@ def get_map(mp):
 
 def sense(sensor,num_z,k):
     ## Get sensor data at time step k
-    idx = 1 + (k-1)*num_z
-    z = sensor[idx:idx+num_z-1,:] # NEED TO: check that it is indexing correctly. 
+    idx = (k)*num_z
+    z = sensor[idx:idx+num_z,:] # NEED TO: check that it is indexing correctly. 
     Z = np.transpose(z) ## 2x1 matrix
     return Z   
 
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     fig=plt.figure()       
     
     ## Kalman - coefs
-    sigmaW = 1
+    sigmaW = 0.01
     sigmaV = 0
     deltaT = 1
     
@@ -198,18 +198,18 @@ if __name__ == '__main__':
     X = np.matrix([[0],[0],[0]])
     cov = np.eye(3) ## 3x3
     I = np.eye(3) ## 3x3
-
+    bF = np.matrix([[0],[0]])
     for k in range(0, 49):
     ## Data given
         ## Get odometry data
         delta_d, delta_theta = get_odom(odom, k)     
+        bF = np.matrix([[bF[0,0] +delta_d*math.cos(delta_theta+X[2,0])], [bF[1,0] +delta_d*math.sin(delta_theta+X[2,0])]])
         ## Get sensor data
-        Z = sense(sensor, num_z, k+1) ## True range and bearing to landmarks. 2x1
+        Z = sense(sensor, num_z, k) ## True range and bearing to landmarks. 2x1
     ## Kalman - start
       ## Predicts
         ## Predict X
         X = X + np.matrix([[delta_d*math.cos(X[2,0])],[delta_d*math.sin(X[2,0])],[delta_theta]]) ## 3x1
-        print(X)
         ## Calculate Theta
         theta = X[2,0]
         ## Calculate Jx
@@ -222,7 +222,8 @@ if __name__ == '__main__':
         cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju) 
         print(cov)
       ## Update
-        for i in range(0,5,5):
+        for i in range(0,5):
+            print('X:'+str(X))
             ## Calculate G
             G = np.matrix([[-(mp[i,0]*math.cos(mp[i,1])-X[0,0])/mp[i,0], -(mp[i,0]*math.sin(mp[i,1])-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*math.sin(mp[i,1])-X[1,0])/(mp[i,0]**2), -(mp[i,0]*math.cos(mp[i,1])-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
             #print('G:'+str(G))
@@ -257,13 +258,15 @@ if __name__ == '__main__':
         #arrow_size = 0.05
         #dx = arrow_size*math.cos(x_true[0])
         #dy = arrow_size*math.sin(x_true[1])
-        #plt.plot(x_true[0],x_true[1],'x',color='g')
-        
+        plt.plot(xTrue[0],xTrue[1],'o',color='g')
+        plt.plot(X[0,0],X[1,0],'x',color='r')
+        print(bF)
+        plt.plot(bF[0,0],bF[1,0],'x',color='b')
         #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)
-    #plt.plot(mp[:,0],mp[:,1],'x',color='r')
+    plt.plot(mp[:,0],mp[:,1],'x',color='y')
     #plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
     #plt.plot(XEst[:,0], XEst[:,1],'x',color='b')
-    #plt.show()
+    plt.show()
     #input()
     #print(x_true)
     #print(pEst)    
