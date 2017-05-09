@@ -43,16 +43,17 @@ beacon38 = items['map'][5]
 beacon45 = items['map'][6]
 beacon57 = items['map'][7]
 
-def plotEllipse(mu,sigma):
+def plotEllipse(mu,sigma,std):
     ax=plt.gca()
     sigma = sigma[:2,:2]
+    sigma = inv(sigma)
     eig = np.linalg.eig(sigma)
     #print('sigma:' + str(sigma))
     #print('eig:' + str(eig))
-    W = eig[0][0]
-    H = eig[0][1]
-    A = np.arctan2(eig[1][1,0],eig[1][0,0])
-    ellipse = Ellipse(xy=(mu[0,0],mu[1,0]), width=W*100, height=H*100,angle=A,fill=False)
+    W = math.sqrt(std*eig[0][0])
+    H = math.sqrt(std*eig[0][1])
+    A = np.rad2deg(np.arctan2(eig[1][1,0],eig[1][0,0]))
+    ellipse = Ellipse(xy=(mu[0,0],mu[1,0]), width=W, height=H,angle=A,fill=False)
     ax.add_patch(ellipse)
     return 0
 
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     
     ## Kalman - coefs
      ## R
-    sigmaT = .001 ## 0.001
+    sigmaT = 1 ## 0.001
     sigmaR = wraptopi(np.deg2rad(10))
     ## Q
     sigmaRang = 0.5 ## 0.5 
@@ -271,7 +272,7 @@ if __name__ == '__main__':
             #print('K:'+str(K))
             print('UpdateCov'+str(cov))
         print('--------------------')
-        plotEllipse(X,cov)
+        plotEllipse(X,cov,3)
       
     ## Kalman - finish
         
