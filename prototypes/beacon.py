@@ -43,9 +43,38 @@ def getGrayMask(img):
                 
     return mask
 
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    tolerance = 3
+    
+    i = 0
+    while i < len(l):
+        current_x = 0
+        for j in range(0,n):
+            if i+j >= len(l):
+                break
+
+            if j == 0:
+                current_x = l[i+j][0]
+            else:
+                if l[i+j][0] - current_x > tolerance:
+                    break
+                
+        if i+j >= len(l):
+            break        
+
+
+        if l[i+j][0] - current_x > tolerance:
+            i = i + j
+            continue
+        else:    
+            yield l[i:i + n]
+            i = i + n
+            continue
+
 if __name__ == '__main__':
 
-    img = cv2.imread('beaconImage291.jpg')
+    img = cv2.imread('beaconImage337.jpg')
     img = cv2.blur(img,(5,5))
     cv2.imshow('orig',img)
 
@@ -154,26 +183,74 @@ if __name__ == '__main__':
     bbd.filterByColor = True
     bbd.blobColor = 255
     bbd.filterByArea = True
-    bbd.minArea = 20 
+    bbd.minArea = 10 
     bbd.maxArea = 1000
     bbd.filterByCircularity = True
     bbd.minCircularity = 0.5
     bbd.filterByInertia = False
     bbd.filterByConvexity = False
     detect_beacon = cv2.SimpleBlobDetector_create(bbd)
-    '''
+    
     br = detect_beacon.detect(filtered_m_r)
     bg = detect_beacon.detect(filtered_m_g)
+    bb = detect_beacon.detect(filtered_m_b)
 
     test_r = cv2.drawKeypoints(img,br,np.array([]),(0,0,255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     cv2.imshow('kp', test_r)
     test_g = cv2.drawKeypoints(img,bg,np.array([]),(0,0,255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     cv2.imshow('kg', test_g)    
-    '''
-    #TODO: ignore blobs detected on edge of image (noise outside the arena)
-    #TODO: summarize blobs into groups with similiar horizontal value
+    test_b = cv2.drawKeypoints(img,bb,np.array([]),(0,0,255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv2.imshow('kb', test_b)
+    
+    frame_tolerance = 10
+    br = [i for i in br if int(round(i.pt[0])) >= frame_tolerance]
+    br = [i for i in br if int(round(i.pt[1])) >= frame_tolerance]
+    br = [i for i in br if int(round(i.pt[0])) < m_r.shape[1] - frame_tolerance]
+    br = [i for i in br if int(round(i.pt[1])) < m_r.shape[0] - frame_tolerance]
+    bg = [i for i in bg if int(round(i.pt[0])) >= frame_tolerance]
+    bg = [i for i in bg if int(round(i.pt[1])) >= frame_tolerance]
+    bg = [i for i in bg if int(round(i.pt[0])) < m_g.shape[1] - frame_tolerance]
+    bg = [i for i in bg if int(round(i.pt[1])) < m_g.shape[0] - frame_tolerance]
+    bb = [i for i in bb if int(round(i.pt[0])) >= frame_tolerance]
+    bb = [i for i in bb if int(round(i.pt[1])) >= frame_tolerance]
+    bb = [i for i in bb if int(round(i.pt[0])) < m_b.shape[1] - frame_tolerance]
+    bb = [i for i in bb if int(round(i.pt[1])) < m_b.shape[0] - frame_tolerance]
+   
+    kp_list = []
+    for it in br:
+        kp_list.append([it.pt[0], it.pt[1], 1, it.size])
+    for it in bg:
+        kp_list.append([it.pt[0], it.pt[1], 2, it.size])
+    for it in bb:
+        kp_list.append([it.pt[0], it.pt[1], 3, it.size])
+    kp_list.sort()
+    
+    print(kp_list)
+    
+    beacon_list = chunks(kp_list,3)
+    result = []
+    for it in beacon_list:
+        #print(it)
+        it.sort(key=lambda x: x[1])
+#        print(it)
+        ID = 0
+        meanX = 0
+        bigY = 0
+        for m in range(0,3):
+            ID = ID + it[m][2] * 2**((2-m)*2)
+            #print(it[m][0])
+            meanX = (meanX + it[m][0])
+            if bigY < it[m][1]:
+                bigY = it[m][1]
+                
+        meanX = meanX / 3
+        beaconID = [meanX, bigY, ID, it[m][3]]
+        result.append(beaconID)
+        
+    print(result)
+
     #TODO: derive blue from other values (scan horizontal line in blue mask until true is found)
-    #TODO: calculate beacon id
-    #TODO: use floor mask to calculate beacon position (scan down until floor pixel is hit)
+    #TODO: calculate beacon range by distance of grouped blobs
+    #TODO: calculate beacon angle by offset from centre line
 
     cv2.waitKey(0);
