@@ -46,12 +46,12 @@ beacon57 = items['map'][7]
 def plotEllipse(mu,sigma,std):
     ax=plt.gca()
     sigma = sigma[:2,:2]
-    sigma = inv(sigma)
+    #sigma = inv(sigma)
     eig = np.linalg.eig(sigma)
     #print('sigma:' + str(sigma))
-    #print('eig:' + str(eig))
-    W = math.sqrt(std*eig[0][0])
-    H = math.sqrt(std*eig[0][1])
+    print('eig:' + str(eig))
+    W = std*math.sqrt(eig[0][0])*4
+    H = std*math.sqrt(eig[0][1])*4
     A = np.rad2deg(np.arctan2(eig[1][1,0],eig[1][0,0]))
     ellipse = Ellipse(xy=(mu[0,0],mu[1,0]), width=W, height=H,angle=A,fill=False)
     ax.add_patch(ellipse)
@@ -208,11 +208,11 @@ if __name__ == '__main__':
     
     ## Kalman - coefs
      ## R
-    sigmaT = 1 ## 0.001
-    sigmaR = wraptopi(np.deg2rad(10))
+    sigmaT = 0.3 #1 ## 0.001
+    sigmaR = wraptopi(np.deg2rad(15))
     ## Q
-    sigmaRang = 0.5 ## 0.5 
-    sigmaB = wraptopi(np.deg2rad(1))
+    sigmaRang = 0.1 ## 0.5 
+    sigmaB = wraptopi(np.deg2rad(10))
      
     deltaT = 1
     
@@ -272,7 +272,9 @@ if __name__ == '__main__':
             #print('K:'+str(K))
             print('UpdateCov'+str(cov))
         print('--------------------')
-        plotEllipse(X,cov,3)
+       ## Standard deviation size
+        std = 3 
+        plotEllipse(X,cov,std)
       
     ## Kalman - finish
         
@@ -288,7 +290,9 @@ if __name__ == '__main__':
         #dx = arrow_size*math.cos(x_true[0])
         #dy = arrow_size*math.sin(x_true[1])
         plt.plot(xTrue[0],xTrue[1],'o',color='g')
-        plt.plot(X[0,0],X[1,0],'x',color='r')
+        #plt.plot(X[0,0],X[1,0],'x',color='r')
+        plt.plot(X[0,0],X[1,0],marker=(3, 0, np.rad2deg(X[2,0])), markersize=8,color='r',linestyle='None')
+
         #print(bF)
         #plt.plot(bF[0,0],bF[1,0],'x',color='b')
         #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)

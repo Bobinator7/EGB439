@@ -41,6 +41,15 @@ beacon38 = items['map'][5]
 beacon45 = items['map'][6]
 beacon57 = items['map'][7]
 
+def wraptopi(x):
+        pi = np.pi
+        x = x - np.floor(x/(2*pi)) *2 *pi
+        if (x>=pi):
+            result = x - 2*pi
+        else:
+            result = x 
+        return result
+
 def ask_the_oracle(xT,k):
     ## x is the pose of the robot at time step k
     xTrue = np.transpose(xT[k,:])
@@ -187,12 +196,16 @@ if __name__ == '__main__':
     fig=plt.figure()       
     
     ## Kalman - coefs
-    sigmaW = 0.01
-    sigmaV = 0
+    #sigmaW = .01
+    sigmaT = 0.02
+    sigmaR = wraptopi(np.deg2rad(10))
+    sigmaRang = 0.15
+    sigmaB = wraptopi(np.deg2rad(5))
+    #sigmaV = 1 
     deltaT = 1
     
-    R = np.matrix([[sigmaV**2, 0],[0,sigmaV**2]])
-    Q = np.matrix([[sigmaW**2, 0],[0, sigmaW**2]])
+    R = np.matrix([[sigmaT**2, 0],[0,sigmaR**2]])
+    Q = np.matrix([[sigmaRang**2, 0],[0, sigmaB**2]])
     
     ## Kalman - initiliaze
     X = np.matrix([[0],[0],[0]])
@@ -203,19 +216,19 @@ if __name__ == '__main__':
     ## Data given
         ## Get odometry data
         delta_d, delta_theta = get_odom(odom, k)     
-        bF = np.matrix([[bF[0,0] +delta_d*math.cos(delta_theta+X[2,0])], [bF[1,0] +delta_d*math.sin(delta_theta+X[2,0])]])
+        #bF = np.matrix([[bF[0,0] +delta_d*math.cos(delta_theta+X[2,0])], [bF[1,0] +delta_d*math.sin(delta_theta+X[2,0])]])
         ## Get sensor data
         Z = sense(sensor, num_z, k) ## True range and bearing to landmarks. 2x1
     ## Kalman - start
       ## Predicts
         ## Predict X
-        X = X + np.matrix([[delta_d*math.cos(X[2,0])],[delta_d*math.sin(X[2,0])],[delta_theta]]) ## 3x1
+        X = X + np.matrix([[delta_d*wraptopi(math.cos(X[2,0]))],[delta_d*wraptopi(math.sin(X[2,0]))],[wraptopi(delta_theta)]]) ## 3x1
         ## Calculate Theta
-        theta = X[2,0]
+        theta = wraptopi(X[2,0])
         ## Calculate Jx
-        Jx = np.matrix([[1,0,-delta_d*math.sin(theta)],[0,1,delta_d*math.sin(theta)],[0,0,1]]) ## 3x2
+        Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(theta))],[0,1,delta_d*wraptopi(math.sin(theta))],[0,0,1]]) ## 3x2
         ## Calculate Ju
-        Ju = np.matrix([[math.cos(theta),0],[math.sin(theta),0],[0,1]]) ## 3x3
+        Ju = np.matrix([[wraptopi(math.cos(theta)),0],[wraptopi(math.sin(theta)),0],[0,1]]) ## 3x3
         #print(Jx)
         #print(Ju)
         ## Predict cov
@@ -225,12 +238,12 @@ if __name__ == '__main__':
         for i in range(0,5):
             print('X:'+str(X))
             ## Calculate G
-            G = np.matrix([[-(mp[i,0]*math.cos(mp[i,1])-X[0,0])/mp[i,0], -(mp[i,0]*math.sin(mp[i,1])-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*math.sin(mp[i,1])-X[1,0])/(mp[i,0]**2), -(mp[i,0]*math.cos(mp[i,1])-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
+            G = np.matrix([[-(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/mp[i,0], -(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/(mp[i,0]**2), -(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
             #print('G:'+str(G))
             ## Calculate K
             K = cov*np.transpose(G)*inv(G*cov*np.transpose(G)+Q) ## 3x2
             ## Calculate H
-            H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0])-X[2,0]]])  ## 2x1 ## TODO: May not be calculated correctly
+            H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[wraptopi(math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0])-X[2,0])]])  ## 2x1 ## TODO: May not be calculated correctly
             ## Update X 
             error = (np.transpose(np.asmatrix(Z[:,i])) - H)
             print('Z:'+str(Z[:,i]))
@@ -260,8 +273,8 @@ if __name__ == '__main__':
         #dy = arrow_size*math.sin(x_true[1])
         plt.plot(xTrue[0],xTrue[1],'o',color='g')
         plt.plot(X[0,0],X[1,0],'x',color='r')
-        print(bF)
-        plt.plot(bF[0,0],bF[1,0],'x',color='b')
+        #print(bF)
+        #plt.plot(bF[0,0],bF[1,0],'x',color='b')
         #plt.plot([pEst[[0]],pEst[[0]]+0.01],[pEst[[1]],pEst[[1]]+0.01],color='b',linewidth=3)
     plt.plot(mp[:,0],mp[:,1],'x',color='y')
     #plt.plot(pEstMatrix[:,0], pEstMatrix[:,1],'x',color='b')
