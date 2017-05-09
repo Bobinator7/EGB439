@@ -43,6 +43,20 @@ beacon38 = items['map'][5]
 beacon45 = items['map'][6]
 beacon57 = items['map'][7]
 
+def plotEllipse(mu,sigma):
+    ax=plt.gca()
+    sigma = sigma[:2,:2]
+    eig = np.linalg.eig(sigma)
+    #print('sigma:' + str(sigma))
+    #print('eig:' + str(eig))
+    W = eig[0][0]
+    H = eig[0][1]
+    A = np.arctan2(eig[1][1,0],eig[1][0,0])
+    ellipse = Ellipse(xy=(mu[0,0],mu[1,0]), width=W*100, height=H*100,angle=A,fill=False)
+    ax.add_patch(ellipse)
+    return 0
+
+ 
 def wraptopi(x):
         pi = np.pi
         x = x - np.floor(x/(2*pi)) *2 *pi
@@ -118,12 +132,6 @@ xCurrent = 0
 yCurrent = 0
 thetaCurrent = 0
 
-def localiser(delta_t):
-    #data = sio.loadmat('data.mat')
-    #A = np.array([[1,0,delta_t,0],[0,1,0,delta_t],[0,0,1,0],[0,0,0,1]])
-    #B = np.array([[(delta_t**2)/2, 0],[0,(delta_t**2)/2],[delta_t,0],[0,delta_t]])
-    return
-
 def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
     
     plt.axis([0,4,0,4])
@@ -195,14 +203,14 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
 
 if __name__ == '__main__':
     
-    fig=plt.figure()       
+          
     
     ## Kalman - coefs
      ## R
-    sigmaT = 0.001
+    sigmaT = .001 ## 0.001
     sigmaR = wraptopi(np.deg2rad(10))
     ## Q
-    sigmaRang = 0.5
+    sigmaRang = 0.5 ## 0.5 
     sigmaB = wraptopi(np.deg2rad(1))
      
     deltaT = 1
@@ -214,59 +222,63 @@ if __name__ == '__main__':
     X = np.matrix([[0],[0],[0]])
     cov = np.eye(3) ## 3x3
     I = np.eye(3) ## 3x3
-    bF = np.matrix([[0],[0]])
+    
+    plt.figure()
+    plt.axis([-100,100,-100,100])
     for k in range(0, 49):
     ## Data given
         ## Get odometry data
         delta_d, delta_theta = get_odom(odom, k)     
-        #bF = np.matrix([[bF[0,0] +delta_d*math.cos(delta_theta+X[2,0])], [bF[1,0] +delta_d*math.sin(delta_theta+X[2,0])]])
         ## Get sensor data
         Z = sense(sensor, num_z, k) ## True range and bearing to landmarks. 2x1
     ## Kalman - start
       ## Predicts
         ## Predict X
         X = X + np.matrix([[delta_d*wraptopi(math.cos(X[2,0]))],[delta_d*wraptopi(math.sin(X[2,0]))],[wraptopi(delta_theta)]]) ## 3x1
-        ## Calculate Theta
-        theta = wraptopi(X[2,0])
         ## Calculate Jx
-        Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(theta))],[0,1,delta_d*wraptopi(math.sin(theta))],[0,0,1]]) ## 3x2
+        Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(X[2,0]))],[0,1,delta_d*wraptopi(math.sin(X[2,0]))],[0,0,1]]) ## 3x2
         ## Calculate Ju
-        Ju = np.matrix([[wraptopi(math.cos(theta)),0],[wraptopi(math.sin(theta)),0],[0,1]]) ## 3x3
-        #print(Jx)
-        #print(Ju)
+        Ju = np.matrix([[wraptopi(math.cos(X[2,0])),0],[wraptopi(math.sin(X[2,0])),0],[0,1]]) ## 3x3
         ## Predict cov
         cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju) 
-        print(cov)
+        print('Ju:'+str(Ju))
+        print('Jx'+str(Jx))
+        print('PredictCov:'+str(cov))
+      
       ## Update
         for i in range(0,5):
-            print('X:'+str(X))
+            #print('X:'+str(X))
+            r = math.sqrt(((mp[i,0]-X[0,0])**2) + ((mp[i,1]-X[1,0])**2))
             ## Calculate G
-            G = np.matrix([[-(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/mp[i,0], -(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/(mp[i,0]**2), -(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
-            #print('G:'+str(G))
+            G = np.matrix([[-(mp[i,0]-X[0,0])/r, -(mp[i,1]-X[1,0])/r, 0 ],[(mp[i,1]-X[1,0])/(r**2), -(mp[i,0]-X[0,0])/(r**2),-1]]) ## 2x3
+            #G = np.matrix([[-(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/mp[i,0], -(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/mp[i,0], 0 ],[(mp[i,0]*wraptopi(math.sin(mp[i,1]))-X[1,0])/(mp[i,0]**2), -(mp[i,0]*wraptopi(math.cos(mp[i,1]))-X[0,0])/(mp[i,0]**2),-1]]) ## 2x3
             ## Calculate K
             K = cov*np.transpose(G)*inv(G*cov*np.transpose(G)+Q) ## 3x2
             ## Calculate H
             H = np.matrix([[math.sqrt((X[0,0]-mp[i,0])**2+(X[1,0]-mp[i,1])**2)],[wraptopi(math.atan2(mp[i,1]-X[1,0],mp[i,0]-X[0,0])-X[2,0])]])  ## 2x1 ## TODO: May not be calculated correctly
             ## Update X 
             error = (np.transpose(np.asmatrix(Z[:,i])) - H)
-            print('Z:'+str(Z[:,i]))
-            print('H:'+str(H))
-            print('error:'+str(error))
+            #print('Z:'+str(Z[:,i]))
+            #print('H:'+str(H))
+            #print('error:'+str(error))
             dx = K*error
-            print('K*error'+str(dx))
+            #print('K*error'+str(dx))
             X = X + K*error
             #print(H)
             #print(np.transpose(np.asmatrix(Z[:,i])))
             ## Update cov 
             cov = (I-K*G)*cov
-            print('K:'+str(K))
+            #print('K:'+str(K))
+            print('UpdateCov'+str(cov))
+        print('--------------------')
+        plotEllipse(X,cov)
       
     ## Kalman - finish
         
         xTrue = ask_the_oracle(xT,k)
-        print('--------------')
-        print('True pos: '+ str(xTrue[0])+','+str(xTrue[1]))
-        print('Estimate pos: '+ str(X))
+        #print('--------------')
+        #print('True pos: '+ str(xTrue[0])+','+str(xTrue[1]))
+        #print('Estimate pos: '+ str(X))
         #print('Estimate pos: '+ str(X[0,0])+','+str(X[1,0]))
         #print('Kalman Gain:'+str(K))
         #print('Kalman Gain:'+str(K))
