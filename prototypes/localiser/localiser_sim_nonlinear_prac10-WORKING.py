@@ -11,6 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
 from numpy.linalg import inv
+import numpy.random as rnd
+from matplotlib.patches import Ellipse
 
 ## conversion from/to raw data
 wheel_dia = 0.065
@@ -196,12 +198,13 @@ if __name__ == '__main__':
     fig=plt.figure()       
     
     ## Kalman - coefs
-    #sigmaW = .01
-    sigmaT = 0.02
+     ## R
+    sigmaT = 0.001
     sigmaR = wraptopi(np.deg2rad(10))
-    sigmaRang = 0.15
-    sigmaB = wraptopi(np.deg2rad(5))
-    #sigmaV = 1 
+    ## Q
+    sigmaRang = 0.5
+    sigmaB = wraptopi(np.deg2rad(1))
+     
     deltaT = 1
     
     R = np.matrix([[sigmaT**2, 0],[0,sigmaR**2]])
