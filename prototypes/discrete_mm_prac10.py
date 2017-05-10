@@ -355,7 +355,14 @@ def getBeaconID(img):
                 
         ## TODO convert meanX and bigY-smallY to range and bearing
         meanX = meanX / 3
-        result = np.append(result,[[ID, meanX, bigY-smallY]],axis=0)
+        
+        m1 = -0.0210896309314587
+        b1 = 1.5588466973637962
+        ran = m1*(bigY-smallY)+b1
+        m2 = -0.142649154
+        b2 = 1.530568848
+        bearing = m2*((meanX-160)/r)+b2
+        result = np.append(result,[[ID, ran, bearing ]],axis=0)
         count = count + 1
     
     return result
