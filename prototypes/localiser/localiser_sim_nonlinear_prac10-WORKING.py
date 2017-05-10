@@ -5,11 +5,12 @@ import io
 #import penguinPi as ppi
 #import picamera
 #import picamery.array
-
-import cv2
+from filterpy.stats import plot_covariance_ellipse
+#import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io as sio
+from scipy.linalg import sqrtm
 from numpy.linalg import inv
 import numpy.random as rnd
 from matplotlib.patches import Ellipse
@@ -46,17 +47,45 @@ beacon57 = items['map'][7]
 def plotEllipse(mu,sigma,std):
     ax=plt.gca()
     sigma = sigma[:2,:2]
-    #sigma = inv(sigma)
+    sigma = inv(sigma)
     eig = np.linalg.eig(sigma)
     #print('sigma:' + str(sigma))
     print('eig:' + str(eig))
-    W = std*math.sqrt(eig[0][0])*4
-    H = std*math.sqrt(eig[0][1])*4
+    W = std*math.sqrt(eig[0][0])
+    H = std*math.sqrt(eig[0][1])
     A = np.rad2deg(np.arctan2(eig[1][1,0],eig[1][0,0]))
     ellipse = Ellipse(xy=(mu[0,0],mu[1,0]), width=W, height=H,angle=A,fill=False)
     ax.add_patch(ellipse)
     return 0
 
+def plotEllipseNew(mu,sigma,s):
+ 
+    sigma = sigma[:2,:2]
+    mu = mu[:2]
+    muT=(mu[0,0],mu[1,0]) 
+    print('muT'+str(muT))
+    plot_covariance_ellipse(muT,cov=sigma,variance=1.0,std=s )
+    return 0
+
+def plotEllipseFeras(mu,sigma,std):
+    print('test')
+    sigma = sigma[:2,:2]
+    mu = mu[:2]
+    print('sigma:'+str(sigma))
+    if(sigma[0,0]!=0 and sigma[1,1]!=0):
+        print('test2')
+        [V,D]=np.linalg.eig(sigma)
+        c = np.arange(0,2*np.pi,0.1)
+        s = np.arange(0,2*np.pi,0.1)
+        for i in range(c.shape[0]):
+            y = std*[math.cos(c[i]),math.sin(s[i])]
+        el = D*sqrtm(V)*y
+        print('D:'+str(D))
+        print('el:'+str(el))
+        print('el:'+str(el))
+        el = [el, el[:,0]]+np.tile(mu,el[0].shape[1]+1)
+        plt.plot(el[1,:],el[2,:])
+    return 0
  
 def wraptopi(x):
         pi = np.pi
@@ -152,7 +181,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
         delta_d, delta_th = get_motion_sim(v,w,t2-t1) ## For simulation
         #delta_d, delta_th = get_motion(tL2,tL1,tR2,tR1) ## On Robot
     
-        xCurrent = xCurrent + delta_d * math.cos(thetaCurrent)
+        xCurrent = xCurrent + delta_d * mrath.cos(thetaCurrent)
         yCurrent = yCurrent + delta_d * math.sin(thetaCurrent)
         thetaCurrent = thetaCurrent + delta_th
         thetaCurrent = thetaCurrent + delta_th
@@ -273,8 +302,8 @@ if __name__ == '__main__':
             print('UpdateCov'+str(cov))
         print('--------------------')
        ## Standard deviation size
-        std = 3 
-        plotEllipse(X,cov,std)
+        std = 10
+        plotEllipseNew(X,cov,std)
       
     ## Kalman - finish
         
