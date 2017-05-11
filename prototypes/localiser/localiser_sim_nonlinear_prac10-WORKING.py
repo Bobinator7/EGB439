@@ -266,7 +266,7 @@ if __name__ == '__main__':
         ## Predict X
         X = X + np.matrix([[delta_d*wraptopi(math.cos(X[2,0]))],[delta_d*wraptopi(math.sin(X[2,0]))],[wraptopi(delta_theta)]]) ## 3x1
         ## Calculate Jx
-        Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(X[2,0]))],[0,1,delta_d*wraptopi(math.sin(X[2,0]))],[0,0,1]]) ## 3x2
+        Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(X[2,0]))],[0,1,delta_d*wraptopi(math.cos(X[2,0]))],[0,0,1]]) ## 3x2
         ## Calculate Ju
         Ju = np.matrix([[wraptopi(math.cos(X[2,0])),0],[wraptopi(math.sin(X[2,0])),0],[0,1]]) ## 3x3
         ## Predict cov

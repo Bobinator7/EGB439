@@ -487,7 +487,7 @@ def toPoint(xTarget, yTarget, xCurrent, yCurrent, thetaCurrent):
    
         #### KALMAN FILTER (start) ####
         ## predict step
-        X = X + np.matrix([[delta_d*wraptopi(math.cos(X[2,0]))],[delta_d*wraptopi(math.sin(X[2,0]))],[wraptopi(delta_theta)]])
+        X = X + np.matrix([[delta_d*wraptopi(math.cos(X[2,0]))],[delta_d*wraptopi(math.sin(X[2,0]))],[wraptopi(X[2,0])]])
         Jx = np.matrix([[1,0,-delta_d*wraptopi(math.sin(X[2,0]))],[0,1,delta_d*wraptopi(math.sin(X[2,0]))],[0,0,1]])
         Ju = np.matrix([[wraptopi(math.cos(X[2,0])),0],[wraptopi(math.sin(X[2,0])),0],[0,1]])
         cov = Jx*cov*np.transpose(Jx)+Ju*R*np.transpose(Ju)
