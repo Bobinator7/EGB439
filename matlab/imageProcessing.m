@@ -1,66 +1,74 @@
-%% Image Processing
+%% Image Processing - EGB439
 clear all;clc;close all;
-img = imread('beacons.jpg');
-img = imgaussfilt(img, 1);
 
-%greenFilter = img;
-greenFilter = img(:,:,1)>55 & img(:,:,2)>70 & img(:,:,3)<29;
-gF = strel('line',2,10);
-gF2= strel('line',10,2);
-test = medfilt2(greenFilter, [6 6]);
+%% import image
+img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_10.jpg');
 
-greenFilterDilate = imdilate(greenFilter,[gF,gF2]);
-greenFilterDilate = 1 - greenFilterDilate;
-greenFloor = img(:,:,1)<40 & img(:,:,2)>75 & img(:,:,3)<42;
+%% blur image
+imgF = imgaussfilt(img, 1);
 
-sD1 = strel('line',100,5);
-sD2 = strel('line',5,70);
-greenFloorDilate = imdilate(greenFloor,[sD1,sD2]);
-figure(1)
-imshow(img)
-imgGamma = gamma_connection(img, 10);
-figure(2)
-imshow(imgGamma)
+%% Gamma correct the image
+imgGamma = gamma_correction(imgF, 10);
+
+%% Calculate the chromoticity
 [chrom, lum] = getChrom(imgGamma);
 
-se = strel('disk',3);
-red = imopen(chrom(:,:,1)<0.8,se);
-green = imopen(chrom(:,:,2)<0.8, se);
-blue = imopen(chrom(:,:,3)<0.8,se);
+%% Threshold
+redBW = im2bw(chrom(:,:,1),0.6);
+blueBW = im2bw(chrom(:,:,3),0.6);
 
+%% Dilate blobs
+se = strel('disk',2);
+% seB = strel('disk',2);
+% red = imopen(chrom(:,:,1)<0.8,se);
+green = imopen(chrom(:,:,2)<0.8,se);
+% blue = imopen(chrom(:,:,3)<0.8,seB);
+% blue = 1-blue;
+% red=1-red;
 
-[oneR, twoR] = bwlabel(1-red, 8);
+%% Erode image
+% se = strel('disk',1);
+% red = imerode(red,se);
+% blue = imerode(blue,se);
+
+%% Remove any blobs smaller than ...
+red = bwareafilt(redBW,[50,1000]);
+blue = bwareafilt(blueBW,[50,1000]);
+
+%% Identify red,green,blue blobs
+[oneR, twoR] = bwlabel(red, 8);
 allRedBlobAreas = regionprops(oneR,'all');
-[oneG, twoG] = bwlabel(test, 8);
-allGreenBlobAreas = regionprops(oneG,'all');
-[oneB, twoB] = bwlabel(1-blue, 8);
+[oneB, twoB] = bwlabel(blue, 8);
 allBlueBlobAreas = regionprops(oneB,'all');
 
+%% Green Keypoints
+% red loop for find green keypoints
+green = 1 - green; % make green blob 1 and other 0
+greenBlobs = [];
+global it;
+for i=1:size(allRedBlobAreas,1)
+    if (green(allRedBlobAreas(i).centroid(2)-allRedBlobAreas(i).MinorAxisLength, allRedBlobAreas(i).centroid(1)))
+        greenBlobs(i) = [allRedBlobAreas(i).centroid(1), allRedBlobAreas(i).centroid(2)];
+    end
+    if (green(allRedBlobAreas(i).centroid(2)+allRedBlobAreas(i).MinorAxisLength, allRedBlobAreas(i).centroid(1)))
+        greenBlobs(i) = [allRedBlobAreas(i).centroid(1), allRedBlobAreas(i).centroid(2)];
+    end
+    it = i;
+end
+for i=i:size(allBlueBlobAreas,1)
+    if (green(allBlueBlobAreas(i).centroid(2)-allBlueBlobAreas(i).MinorAxisLength, allBlueBlobAreas(i).centroid(1)))
+        greenBlobs(i+it) = [allBlueBlobAreas(i).centroid(1), allBlueBlobAreas(i).centroid(2)];
+    end
+    if (green(allBlueBlobAreas(i).centroid(2)+allBlueBlobAreas(i).MinorAxisLength, allBlueBlobAreas(i).centroid(1)))
+        greenBlobs(i+it) = [allBlueBlobAreas(i).centroid(1), allBlueBlobAreas(i).centroid(2)];
+    end
+end
 
-new = red & green & blue;
+% TODO: not tested
 
+%% show images
 
-% figure(3)
-% imshow(red)
-% figure(4)
-% imshow(green)
-% figure(5)
-% imshow(blue)
-% figure(6)
-% imshow(new)
-%m_r = getBeaconID(img); 
-
-figure(7)
-imshow(greenFilter)
-figure(8)
-imshow(greenFilterDilate)
-figure(9)
-imshow(greenFloor)
-figure(10)
-imshow(greenFloorDilate)
-figure(11)
-imshow(test)
-
+%% Keypoints of beacons
 kp_list = [];
 for it = 1:numel(allRedBlobAreas)
     kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
@@ -72,9 +80,12 @@ for it = 1:numel(allBlueBlobAreas)
     kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
 end
 
-%kp_list.sort()
+%% sort rows per pixel location of 1st column
 kp_list = sortrows(kp_list,[1]);
-beacon1 = kp_list(1:3)
+
+
+%result = chunks()
+beacon1 = kp_list(1:3);
 
 disp(kp_list)
 
