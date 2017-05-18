@@ -14,15 +14,15 @@ imgGamma = gamma_correction(imgF, 10);
 [chrom, lum] = getChrom(imgGamma);
 
 %% Threshold
-redBW = im2bw(chrom(:,:,1),0.6);
-blueBW = im2bw(chrom(:,:,3),0.6);
+red = im2bw(chrom(:,:,1),0.6);
+% blue = im2bw(chrom(:,:,3),0.6);
 
 %% Dilate blobs
-se = strel('disk',2);
-% seB = strel('disk',2);
+se = strel('disk',2,5);
+%seB = strel('line',10,90);
 % red = imopen(chrom(:,:,1)<0.8,se);
 green = imopen(chrom(:,:,2)<0.8,se);
-% blue = imopen(chrom(:,:,3)<0.8,seB);
+blue = imdilate(chrom(:,:,3)<0.8,se);
 % blue = 1-blue;
 % red=1-red;
 
@@ -32,8 +32,8 @@ green = imopen(chrom(:,:,2)<0.8,se);
 % blue = imerode(blue,se);
 
 %% Remove any blobs smaller than ...
-red = bwareafilt(redBW,[50,1000]);
-blue = bwareafilt(blueBW,[50,1000]);
+%red = bwareafilt(redBW,[50,1000]);
+%blue = bwareafilt(blueBW,[50,1000]);
 
 %% Identify red,green,blue blobs
 [oneR, twoR] = bwlabel(red, 8);
@@ -47,47 +47,49 @@ green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
 global it;
 for i=1:size(allRedBlobAreas,1)
-    if (green(allRedBlobAreas(i).centroid(2)-allRedBlobAreas(i).MinorAxisLength, allRedBlobAreas(i).centroid(1)))
-        greenBlobs(i) = [allRedBlobAreas(i).centroid(1), allRedBlobAreas(i).centroid(2)];
+    if (green(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
+        greenBlobs = cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2))-allRedBlobAreas(i).MinorAxisLength]);
     end
-    if (green(allRedBlobAreas(i).centroid(2)+allRedBlobAreas(i).MinorAxisLength, allRedBlobAreas(i).centroid(1)))
-        greenBlobs(i) = [allRedBlobAreas(i).centroid(1), allRedBlobAreas(i).centroid(2)];
+    if (green(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
+        greenBlobs = cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength)]);
     end
     it = i;
 end
 for i=i:size(allBlueBlobAreas,1)
-    if (green(allBlueBlobAreas(i).centroid(2)-allBlueBlobAreas(i).MinorAxisLength, allBlueBlobAreas(i).centroid(1)))
-        greenBlobs(i+it) = [allBlueBlobAreas(i).centroid(1), allBlueBlobAreas(i).centroid(2)];
+    if (green(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
+        greenBlobs = cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength)]);
     end
-    if (green(allBlueBlobAreas(i).centroid(2)+allBlueBlobAreas(i).MinorAxisLength, allBlueBlobAreas(i).centroid(1)))
-        greenBlobs(i+it) = [allBlueBlobAreas(i).centroid(1), allBlueBlobAreas(i).centroid(2)];
+    if (green(round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
+        greenBlobs = cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength)]);
     end
 end
-
-% TODO: not tested
+% NOTE: both blue and red will find the green spot
+% TODO: add filter to  remove points from greenBlobs if within a close
+% proximity to another point, i.e., within 5 pixels 
+% TODO: pick up small blue blobs
 
 %% show images
 
 %% Keypoints of beacons
-kp_list = [];
-for it = 1:numel(allRedBlobAreas)
-    kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
-end
-for it = 1:numel(allGreenBlobAreas)
-    kp_list = [kp_list;allGreenBlobAreas(it).Centroid, 2, allGreenBlobAreas(it).MajorAxisLength];
-end
-for it = 1:numel(allBlueBlobAreas)
-    kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
-end
-
-%% sort rows per pixel location of 1st column
-kp_list = sortrows(kp_list,[1]);
-
-
-%result = chunks()
-beacon1 = kp_list(1:3);
-
-disp(kp_list)
+% kp_list = [];
+% for it = 1:numel(allRedBlobAreas)
+%     kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
+% end
+% for it = 1:numel(allGreenBlobAreas)
+%     kp_list = [kp_list;allGreenBlobAreas(it).Centroid, 2, allGreenBlobAreas(it).MajorAxisLength];
+% end
+% for it = 1:numel(allBlueBlobAreas)
+%     kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
+% end
+% 
+% %% sort rows per pixel location of 1st column
+% kp_list = sortrows(kp_list,[1]);
+% 
+% 
+% %result = chunks()
+% beacon1 = kp_list(1:3);
+% 
+% disp(kp_list)
 
 % %% TODO: Add chunks rejector
 % for it in kp_list:
