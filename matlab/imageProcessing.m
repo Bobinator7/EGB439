@@ -2,7 +2,7 @@
 clear all;clc;close all;
 
 %% import image
-img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_2.jpg');
+img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_1.jpg');
 
 %% blur image
 imgF = imgaussfilt(img, 1);
@@ -21,13 +21,11 @@ imgGamma = gamma_correction(imgF, 10);
 se = strel('diamond',2);
 seB = strel('line',4,90);
 seB2 = strel('line',4,0);
-figure(1);imshow(chrom(:,:,3)<0.8);
 red = imopen(chrom(:,:,1)<0.8,se);
 green = imopen(chrom(:,:,2)<0.8,se);
 blue = imopen(chrom(:,:,3)<0.8,se);
 blue = imopen(blue,seB);
 blue = imopen(blue,seB2);
-figure(2);imshow(blue);
 blue = 1-blue;
 red=1-red;
 
@@ -50,31 +48,36 @@ allBlueBlobAreas = regionprops(oneB,'all');
 % red loop for find green keypoints
 green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
-global it;
 for i=1:size(allRedBlobAreas,1)
     if (green(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2))-allRedBlobAreas(i).MinorAxisLength]);
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2))-allRedBlobAreas(i).MinorAxisLength]));
     end
     if (green(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength)]);
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength)]));
     end
     it = i;
 end
 for i=i:size(allBlueBlobAreas,1)
     if (green(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength)]);
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength)]));
     end
     if (green(round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength)]);
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength)]));
     end
 end
-% NOTE: both blue and red will find the green spot
-% TODO: add filter to  remove points from greenBlobs if within a close
-% proximity to another point, i.e., within 5 pixels 
-% TODO: pick up small blue blobs
+% One green point if in proximity.
+if (size(greenBlobs,1)>1)
+    for i=1:(size(greenBlobs,1)-1)
+        if (abs(greenBlobs(i,1)-greenBlobs(i+1,1))<5)&&(abs(greenBlobs(i,2)-greenBlobs(i+1,2))<5)
+            greenBlobs(i+1,:)=[];
+        end
+    end
+end
+% TODO: pick up small blue blobs - tempramental
+% TODO: pick up small green
 
 %% show images
-
+figure;imshow(chrom);
 %% Keypoints of beacons
 % kp_list = [];
 % for it = 1:numel(allRedBlobAreas)
