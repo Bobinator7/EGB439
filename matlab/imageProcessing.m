@@ -2,7 +2,7 @@
 clear all;clc;close all;
 
 %% import image
-img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_1.jpg');
+img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_2.jpg');
 
 %% blur image
 imgF = imgaussfilt(img, 1);
@@ -78,20 +78,28 @@ end
 
 %% show images
 figure;imshow(chrom);
+for j=1:size(greenBlobs,1)
+    hold on; plot(greenBlobs(i,1),greenBlobs(i,2),'o--k')
+end
 %% Keypoints of beacons
-% kp_list = [];
-% for it = 1:numel(allRedBlobAreas)
-%     kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
-% end
-% for it = 1:numel(allGreenBlobAreas)
-%     kp_list = [kp_list;allGreenBlobAreas(it).Centroid, 2, allGreenBlobAreas(it).MajorAxisLength];
-% end
-% for it = 1:numel(allBlueBlobAreas)
-%     kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
-% end
-% 
-% %% sort rows per pixel location of 1st column
-% kp_list = sortrows(kp_list,[1]);
+kp_list = [];
+for it = 1:numel(allRedBlobAreas)
+    kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
+end
+for it = 1:size(greenBlobs,1)
+    kp_list = [kp_list;[greenBlobs(it,1) greenBlobs(it,2)], 2, 0]; %Centroid for green not known - default 0.
+end
+for it = 1:numel(allBlueBlobAreas)
+    kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
+end
+
+%% sort rows per pixel location of 1st column
+kp_list = sortrows(kp_list,[1]);
+
+% TODO: remove stray blobs - if 3 kp are not within a tolerance remove from
+% kp_list
+% TODO: get beacon ID
+
 % 
 % 
 % %result = chunks()
