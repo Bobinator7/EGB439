@@ -2,7 +2,7 @@
 clear all;clc;close all;
 
 %% import image
-img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_10.jpg');
+img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_7.jpg');
 
 %% blur image
 imgF = imgaussfilt(img, 1);
@@ -98,7 +98,11 @@ kp_list = sortrows(kp_list,[1]);
 
 %% Remove not complete beacon from kp_list
 tolerance = 5;
-x_current = 0;listA=[];listB=[];
+m1 = -0.0210896309314587;
+b1 = 1.5588466973637962;
+m2 = -0.142649154;
+b2 = 1.530568848;
+x_current = 0;listA=[];listB=[];z=[];
 for ii=1:size(kp_list,1)
     if abs(x_current - kp_list(ii,1))>tolerance
         listA = [];
@@ -108,71 +112,17 @@ for ii=1:size(kp_list,1)
     else
         listA = cat(1,listA,kp_list(ii,:));
         if size(listA,1)>=3
+            listA = sortrows(listA,[2]);
+            ID = bitshift(listA(1,3),4)+bitshift(listA(2,3),2)+bitshift(listA(3,3),0);
+            meanX = sum(listA(:,1))/3;
+            meanY = sum(listA(:,2))/3;
+            distY = listA(3,2)-listA(1,2);
+            ran = m1*(distY)+b1;
+            bearing = m2*((meanX-160)/ran)+b2;
+            beacon = [ran, bearing, ID];
+            z = cat(1,z,beacon);
             listB = cat(1,listB,listA);
             listA = [];
         end
     end
 end
-
-
-
-
-
-% if size(kp_list,1)>2
-%     for j=1:size(kp_list,1)-2     
-%         disp(j)
-%         if size(kp_list,1)==3
-%             break
-%         end
-%         if abs(kp_list(j,1)-kp_list(j+1,1))>5 || abs(kp_list(j,1)-kp_list(j+2,1))>5
-%             kp_list(j:j+1,:)=[];
-%             
-%         end
-%     end
-% end
-%result= chunks(kp_list,3);
-%% 
-% TODO: remove stray blobs - if 3 kp are not within a tolerance remove from
-% kp_list
-% TODO: get beacon ID
-
-
-% %result = chunks()
-% beacon1 = kp_list(1:3);
-% 
-% disp(kp_list)
-
-% %% TODO: Add chunks rejector
-% for it in kp_list:
-%     ID = 0
-%     meanX = 0
-%     bigY = 0
-%     smallY = 900
-%     for m = 1:3
-%         % get ID
-%         ID = ID + it[m][2] * 2**((2-m)*2)
-% 
-%         % get horizontal position
-%         meanX = (meanX + it[m][0])
-% 
-%         % get size of beacon
-%         if smallY > it[m][1]:
-%             smallY = it[m][1]
-%         if bigY < it[m][1]:
-%             bigY = it[m][1]
-% 
-%     
-%     meanX = meanX / 3
-% 
-%     m1 = -0.0210896309314587
-%     b1 = 1.5588466973637962
-%     ran = m1*(bigY-smallY)+b1
-%     m2 = -0.142649154
-%     b2 = 1.530568848
-%     bearing = m2*((meanX-160)/r)+b2
-%     result = np.append(result,[[ID, ran, bearing ]],axis=0)
-%     count = count + 1
-% 
-% return result
-    
-
