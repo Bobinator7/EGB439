@@ -24,6 +24,9 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         
         %% get sensor data
         
+        img = pb.getImageFromCamera();
+        z = senseless(img);
+        
         %% Kalman Filter
         [mu,sigma] = prediction_step(mu,sigma,delta_d,delta_theta);
         [mu,sigma,idx] = update_step(mu,sigma,z,idx);

@@ -78,10 +78,10 @@ end
 % TODO: pick up small green
 
 %% show images
-figure;imshow(chrom);
-for j=1:size(greenBlobs,1)
-    hold on; plot(greenBlobs(i,1),greenBlobs(i,2),'o--k')
-end
+% figure;imshow(chrom);
+% for j=1:size(greenBlobs,1)
+%     hold on; plot(greenBlobs(i,1),greenBlobs(i,2),'o--k')
+% end
 %% Keypoints of beacons
 kp_list = [];
 for it = 1:numel(allRedBlobAreas)
