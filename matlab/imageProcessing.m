@@ -2,7 +2,7 @@
 clear all;clc;close all;
 
 %% import image
-img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_2.jpg');
+img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_10.jpg');
 
 %% blur image
 imgF = imgaussfilt(img, 1);
@@ -84,24 +84,59 @@ end
 %% Keypoints of beacons
 kp_list = [];
 for it = 1:numel(allRedBlobAreas)
-    kp_list = [kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength];
+    kp_list = round([kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength]);
 end
 for it = 1:size(greenBlobs,1)
-    kp_list = [kp_list;[greenBlobs(it,1) greenBlobs(it,2)], 2, 0]; %Centroid for green not known - default 0.
+    kp_list = round([kp_list;[greenBlobs(it,1) greenBlobs(it,2)], 2, 0]); %Centroid for green not known - default 0.
 end
 for it = 1:numel(allBlueBlobAreas)
-    kp_list = [kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength];
+    kp_list = round([kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength]);
 end
 
 %% sort rows per pixel location of 1st column
 kp_list = sortrows(kp_list,[1]);
 
+%% Remove not complete beacon from kp_list
+tolerance = 5;
+x_current = 0;listA=[];listB=[];
+for ii=1:size(kp_list,1)
+    if abs(x_current - kp_list(ii,1))>tolerance
+        listA = [];
+        x_current = kp_list(ii,1);
+        listA = cat(1,listA,kp_list(ii,:));
+        continue
+    else
+        listA = cat(1,listA,kp_list(ii,:));
+        if size(listA,1)>=3
+            listB = cat(1,listB,listA);
+            listA = [];
+        end
+    end
+end
+
+
+
+
+
+% if size(kp_list,1)>2
+%     for j=1:size(kp_list,1)-2     
+%         disp(j)
+%         if size(kp_list,1)==3
+%             break
+%         end
+%         if abs(kp_list(j,1)-kp_list(j+1,1))>5 || abs(kp_list(j,1)-kp_list(j+2,1))>5
+%             kp_list(j:j+1,:)=[];
+%             
+%         end
+%     end
+% end
+%result= chunks(kp_list,3);
+%% 
 % TODO: remove stray blobs - if 3 kp are not within a tolerance remove from
 % kp_list
 % TODO: get beacon ID
 
-% 
-% 
+
 % %result = chunks()
 % beacon1 = kp_list(1:3);
 % 
