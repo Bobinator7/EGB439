@@ -1,7 +1,9 @@
 %% Image Processing - EGB439
 function z = senseless(img)
-%clear all;clc;close all;
-
+if isempty(img)
+    z =[];
+    return 
+end
 %% import image
 %img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_7.jpg');
 
