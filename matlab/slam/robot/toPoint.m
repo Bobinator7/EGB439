@@ -21,10 +21,12 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
     while true
         %% do motion
         [delta_d,delta_theta] = do_motion(pb,vL,vR,dt);
+
         
         %% get sensor data
         
         img = pb.getImageFromCamera();
+        img = imrotate(img,-90);
         z = senseless(img);
         
         %% Kalman Filter

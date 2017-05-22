@@ -52,15 +52,16 @@ allBlueBlobAreas = regionprops(oneB,'all');
 green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
 for i=1:size(allRedBlobAreas,1)
-    if (green(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2))-allRedBlobAreas(i).MinorAxisLength]));
+    idx1 = subplus(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength));
+    if (green(idx1, round(allRedBlobAreas(i).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), idx1]));
     end
     if (green(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
         greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength)]));
     end
-    it = i;
+    %it = i;
 end
-for i=i:size(allBlueBlobAreas,1)
+for i=1:size(allBlueBlobAreas,1)
     if (green(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
         greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength)]));
     end

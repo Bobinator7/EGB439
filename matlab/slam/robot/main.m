@@ -1,7 +1,8 @@
 %% Test 
 
 % robot init
-startup_robot('172.19.232.163');
+pb = startup_robot('172.19.232.163');
+
 
 % EKF init
 idx = [];

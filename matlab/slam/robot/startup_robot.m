@@ -1,4 +1,4 @@
-function startup_robot(IP)
+function pb = startup_robot(IP)
 %% functions available for penguinPi
 %pb.setMotorSpeeds(R,L);
 %ticks = pb.getMotorTicks();
