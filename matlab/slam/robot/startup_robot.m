@@ -7,6 +7,8 @@ function startup_robot(IP)
 %% add subfolders into path
 addpath('./robot_default')
 addpath('./motion')
+addpath('./ekf')
+addpath('./vision')
 
 %% initialize robot
 pb = PiBot(IP);

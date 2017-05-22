@@ -15,6 +15,7 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
     %sigma = eye(3);
     % start configuration
     %X = start_configuration(:);
+    %idx = []
     
     %% motion loop
     while true
