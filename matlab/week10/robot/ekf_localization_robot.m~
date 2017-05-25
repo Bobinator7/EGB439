@@ -1,0 +1,23 @@
+function ekf_localization_robot()
+clear all
+close all
+
+% extract data
+load('map.mat');
+x = [map(1,2:3)'; 0]; 
+goals = map(2:3,2:3);
+beacons = map(4:end,2:3);
+scatter(beacons(:,1),beacons(:,2),200,'k*');
+hold on
+scatter(goals(:,1),goals(:,2),200,'rx');
+scatter(x(1),x(2),200,'>')
+
+x = toPoint(pb,)
+
+end
+
+function plot_pose(x)
+    l = 0.1;
+    x_axis = [0,l,10];
+    plot()
+end

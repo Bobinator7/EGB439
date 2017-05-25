@@ -67,7 +67,7 @@ def toPoint(xTarget, yTarget, vel):
     yCurrent = 0
     thetaCurrent = 0 
     thetaTarget = math.atan((yTarget - yCurrent)/(xTarget - xCurrent))
-    velAv = Kv*sqrt((xTarget-xCurrent)**2 + (yTarget-xCurrent)**2)
+    velAv = Kv*sqrt((xTarget-xCurrent)**2 + (yTarget-yCurrent)**2)
     velDiff = Kh*(thetaTarget - thetaCurrent)
      
 

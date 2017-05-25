@@ -1,0 +1,56 @@
+color examples:
+
+- sample 255 (near, centre, non moving): 
+  "beacon red": 
+  HSV[3 85 58]      BGR[22 28 147]
+  HSV[15 80 31]     BGR[16 32 79]   (note: shadowy part, centre beacon)
+  HSV[356 82 50]    BGR[30 23 128]
+  HSV[5 80 39]      BGR[20 26 99]   (note: shadowy part, right beacon)
+  "beacon green":
+  HSV[81 57 40]     BGR[44 103 82]
+  HSV[71 73 29]     BGR[20 73 63]   (note: shadowy part, centre beacon)
+  HSV[81 72 40]     BGR[29 103 77]
+  HSV[75 63 41]     BGR[39 104 88]
+  "beacon blue":
+  HSV[217 42 40]    BGR[101 75 59]
+  HSV[217 41 28]    BGR[71 53 42]   (note: shadowy part, left beacon)
+  HSV[240 34 39]    BGR[99 65 65]
+  HSV[283 34 24]    BGR[61 40 55]   (note: shadowy part, right beacon)
+  "floor green":
+  HSV[119 55 36]    BGR[43 93 42]   (note: front green)
+  HSV[124 52 43]    BGR[53 110 57]  (note: bright floor)
+  HSV[102 55 29]    BGR[33 73 45]   (note: dark background)
+
+- sample 287 (far, centre, non moving):
+  "beacon red":
+  HSV[11 69 27]     BGR[21 30 68]   (note: left)
+  HSV[22 81 25]     BGR[12 31 64]   (note: centre)
+  HSV[7 77 33]      BGR[19 26 83]   (note: right)
+  "beacon green":
+  HSV[60 49 27]     BGR[35 69 69]   (note: left)
+  HSV[58 69 28]     BGR[22 70 72]   (note: centre)
+  HSV[66 51 28]     BGR[35 72 68]
+  HSV[40 64 26]     BGR[24 53 67]   (note: edge white and red)
+  "beacon blue":
+  HSV[165 9 18]     BGR[46 47 43]   (note: left)
+  HSV[140 14 17]    BGR[39 43 37]   (note: left edge)
+  HSV[311 34 24]    BGR[57 40 61]   (note: right middle)
+  HSV[322 42 25]    BGR[54 37 64]   (note: blur right, blue to red)
+  "floor green":
+  HSV[119 54 39]    BGR[46 100 47]  (note: front green)
+  HSV[121 53 45]    BGR[56 116 55]  (note: bright floor)
+  HSV[125 63 28]    BGR[31 72 27]   (note: dark background)
+  HSV[99 48 19]     BGR[25 48 33]   (note: between beacons)
+
+- sample 196 (very close and near, moving):
+  "beacon red":
+  HSV[359 90 31]    BGR[9 8 80]
+  HSV[7 100 25]     BGR[0 8 65]     (note: left shadowy)
+  HSV[20 99 32]     BGR[1 27 81]    (note: right)
+  "beacon green":
+  HSV[61 99 26]     BGR[1 67 66]    
+  HSV[52 94 27]     BGR[4 59 68]
+  HSV[36 100 28]    BGR[0 43 72]    (note: transition to red)
+  "beacon blue":
+  HSV[253 45 29]    BGR[74 41 48]
+  HSV[317 54 26]    BGR[57 31 67]   (note: transistion to red)
