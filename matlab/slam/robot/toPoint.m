@@ -57,8 +57,15 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         if vR < -0.5
             vR = -0.5;
         end
+        
+        %% plot stuff
+        plot_robot(mu,sigma);
+        plot_beacons(mu,sigma,idx);  
 
     end
+    
+  
+    
     
     %% stop motors after motion
     pb.setMotorSpeeds(0,0);

@@ -51,34 +51,42 @@ allBlueBlobAreas = regionprops(oneB,'all');
 % red loop for find green keypoints
 green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
-for i=1:size(allRedBlobAreas,1)
-    idx1 = subplus(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength));
-    idx2 = subplus(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength));
-    if (green(idx1, round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), idx1]));
+for ii=1:size(allRedBlobAreas,1)
+    idx1 = subplus(round(allRedBlobAreas(ii).Centroid(2)-allRedBlobAreas(ii).MinorAxisLength)) +1;
+    idx2 = subplus(round(allRedBlobAreas(ii).Centroid(2)+allRedBlobAreas(ii).MinorAxisLength)) +1;
+    if idx2 > size(green,1)
+        idx2 = size(green,1);
     end
-    if (green(idx2, round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), idx2]));
+    if (green(idx1, round(allRedBlobAreas(ii).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(ii).Centroid(1)), idx1]));
+    end
+    if (green(idx2, round(allRedBlobAreas(ii).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(ii).Centroid(1)), idx2]));
     end
     %it = i;
 end
-for i=1:size(allBlueBlobAreas,1)
-    idx3 = subplus(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength));
-    idx4 = subplus(round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength));
-    if (green(idx3, round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), idx3]));
+for ii=1:size(allBlueBlobAreas,1)
+    idx3 = subplus(round(allBlueBlobAreas(ii).Centroid(2)-allBlueBlobAreas(ii).MinorAxisLength)) +1;
+    idx4 = subplus(round(allBlueBlobAreas(ii).Centroid(2)+allBlueBlobAreas(ii).MinorAxisLength)) +1;
+    if idx4 > size(green,1)
+        idx4 = size(green,1);
     end
-    if (green(idx4, round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), idx4]));
+    if (green(idx3, round(allBlueBlobAreas(ii).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(ii).Centroid(1)), idx3]));
+    end
+    if (green(idx4, round(allBlueBlobAreas(ii).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(ii).Centroid(1)), idx4]));
     end
 end
 % One green point if in proximity.
 if (size(greenBlobs,1)>1)
-    for i=1:(size(greenBlobs,1)-1)
-        if (abs(greenBlobs(i,1)-greenBlobs(i+1,1))<5)&&(abs(greenBlobs(i,2)-greenBlobs(i+1,2))<5)
-            greenBlobs(i+1,:)=[];
+    tmp = greenBlobs;
+    for ii=1:(size(greenBlobs,1)-1)
+        if (abs(greenBlobs(ii,1)-greenBlobs(ii+1,1))<5)&&(abs(greenBlobs(ii,2)-greenBlobs(ii+1,2))<5)
+            tmp(ii+1,:)=[];
         end
     end
+    greenBlobs = tmp;
 end
 % TODO: pick up small blue blobs - tempramental
 % TODO: pick up small green
@@ -101,6 +109,11 @@ for it = 1:numel(allBlueBlobAreas)
 end
 
 %% sort rows per pixel location of 1st column
+if isempty(kp_list)
+    z = [];
+    return
+end
+
 kp_list = sortrows(kp_list,[1]);
 
 %% Remove not complete beacon from kp_list

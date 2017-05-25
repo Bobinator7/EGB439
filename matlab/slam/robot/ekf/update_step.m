@@ -20,11 +20,11 @@ function [mu,sigma,idx] = update_step(mu,sigma,z,idx)
             
             %scatter(mu(ii*2+1+3,1),mu(ii*2+2+3,1),'bx');
             %plot_cov(mu(ii*2+1+3:ii*2+2+3,1),sigma(ii*2+1+3:ii*2+2+3,ii*2+1+3:ii*2+2+3),3);
-            mu_idx = find(idx==z(ii,3));
-            mu_idx1 = 2*mu_idx-1 + 3;
-            mu_idx2 = 2*mu_idx + 3;
-            scatter(mu(mu_idx1,1),mu(mu_idx2,1),'bx');
-            plot_cov(mu(mu_idx1:mu_idx2,1),sigma(mu_idx1:mu_idx2,mu_idx1:mu_idx2),3,'b');
+            %mu_idx = find(idx==z(ii,3));
+            %mu_idx1 = 2*mu_idx-1 + 3;
+            %mu_idx2 = 2*mu_idx + 3;
+            %scatter(mu(mu_idx1,1),mu(mu_idx2,1),'bx');
+            %plot_cov(mu(mu_idx1:mu_idx2,1),sigma(mu_idx1:mu_idx2,mu_idx1:mu_idx2),3,'b');
         else
             % calculate G
             xr = mu(1:2,1);
@@ -53,9 +53,9 @@ function [mu,sigma,idx] = update_step(mu,sigma,z,idx)
             % predict!
             error = z(ii,1:2)'-h;
             error(2) = wrapToPi(error(2));
-            mu = mu + K*error;
+            %mu = mu + K*error;
             mu(3,1) = wrapToPi(mu(3,1));
-            sigma = (eye(size(sigma))-K*G)*sigma;
+            %sigma = (eye(size(sigma))-K*G)*sigma;
         end
     end
     
