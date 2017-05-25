@@ -53,20 +53,23 @@ green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
 for i=1:size(allRedBlobAreas,1)
     idx1 = subplus(round(allRedBlobAreas(i).Centroid(2)-allRedBlobAreas(i).MinorAxisLength));
+    idx2 = subplus(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength));
     if (green(idx1, round(allRedBlobAreas(i).Centroid(1))))
         greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), idx1]));
     end
-    if (green(round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength), round(allRedBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), round(allRedBlobAreas(i).Centroid(2)+allRedBlobAreas(i).MinorAxisLength)]));
+    if (green(idx2, round(allRedBlobAreas(i).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allRedBlobAreas(i).Centroid(1)), idx2]));
     end
     %it = i;
 end
 for i=1:size(allBlueBlobAreas,1)
-    if (green(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength)]));
+    idx3 = subplus(round(allBlueBlobAreas(i).Centroid(2)-allBlueBlobAreas(i).MinorAxisLength));
+    idx4 = subplus(round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength));
+    if (green(idx3, round(allBlueBlobAreas(i).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), idx3]));
     end
-    if (green(round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength), round(allBlueBlobAreas(i).Centroid(1))))
-        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), round(allBlueBlobAreas(i).Centroid(2)+allBlueBlobAreas(i).MinorAxisLength)]));
+    if (green(idx4, round(allBlueBlobAreas(i).Centroid(1))))
+        greenBlobs = round(cat(1,greenBlobs,[round(allBlueBlobAreas(i).Centroid(1)), idx4]));
     end
 end
 % One green point if in proximity.
