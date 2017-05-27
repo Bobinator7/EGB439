@@ -81,15 +81,12 @@ end
 % One green point if in proximity.
 greenBlobs = sort(greenBlobs,1);
 if (size(greenBlobs,1)>1)
-    tmp = [];
-    last_green = [-100 -100];
-    count = 1;
-    for ii=1:(size(greenBlobs,1))
-        if ~((abs(greenBlobs(ii,1)-last_green(1,1))<10)&&(abs(greenBlobs(ii,2)-last_green(1,2))<10))
-            tmp(count,:)=greenBlobs(ii,:);
-            count = count +1;
+    tmp = greenBlobs;
+    last_green = [];
+    for ii=1:(size(greenBlobs,1)-1)
+        if (abs(greenBlobs(ii,1)-greenBlobs(ii+1,1))<5)&&(abs(greenBlobs(ii,2)-greenBlobs(ii+1,2))<5)
+            tmp(ii+1,:)=[];
         end
-        last_green = greenBlobs(ii,:);
     end
     greenBlobs = tmp;
 end
