@@ -25,13 +25,18 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         
         %% get sensor data
         
-        img = pb.getImageFromCamera();
+        img = flipud(pb.getImageFromCamera());
         img = imrotate(img,-90);
+        
         z = senseless(img);
         
         %% Kalman Filter
         [mu,sigma] = prediction_step(mu,sigma,delta_d,delta_theta);
+        plot_robot(mu,sigma);
+        plot_beacons(mu,sigma,idx);  
         [mu,sigma,idx] = update_step(mu,sigma,z,idx);
+        plot_robot(mu,sigma);
+        plot_beacons(mu,sigma,idx);  
                 
         %% break when goal is reached
         dist2target = sqrt((target(1)-mu(1,1))^2+(target(2)-mu(2,1))^2);
@@ -59,8 +64,8 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         end
         
         %% plot stuff
-        plot_robot(mu,sigma);
-        plot_beacons(mu,sigma,idx);  
+        %plot_robot(mu,sigma);
+        %plot_beacons(mu,sigma,idx);  
 
     end
     

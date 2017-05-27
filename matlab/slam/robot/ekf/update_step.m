@@ -53,9 +53,9 @@ function [mu,sigma,idx] = update_step(mu,sigma,z,idx)
             % predict!
             error = z(ii,1:2)'-h;
             error(2) = wrapToPi(error(2));
-            %mu = mu + K*error;
+            mu = mu + K*error;
             mu(3,1) = wrapToPi(mu(3,1));
-            %sigma = (eye(size(sigma))-K*G)*sigma;
+            sigma = (eye(size(sigma))-K*G)*sigma;
         end
     end
     
