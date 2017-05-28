@@ -19,6 +19,5 @@ target = [0.25;0.25;deg2rad(-90)];
 
 % optional: plotting function coord frame
 
-% TODO: drop beacons not in list
 % TODO: adjust params for motion model
 % TODO: write to_angle function to rotate and SLAM

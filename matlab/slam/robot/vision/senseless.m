@@ -4,6 +4,10 @@ if isempty(img)
     z =[];
     return 
 end
+
+%% real beacons
+idReal = [27 29 38 45 57];
+
 %% import image
 %img = imread('C:\Users\Callum\Documents\University\EGB439\EGB439\matlab\images\img_7.jpg');
 
@@ -120,6 +124,15 @@ if isempty(kp_list)
 end
 
 kp_list = sortrows(kp_list,[1]);
+
+%% remove beacons not in realID list
+
+for ii=1:size(kp_list,1)
+    if kp_list(ii,3) ~= idReal(1) && kp_list(ii,3)~= idReal(2) && kp_list(ii,3) ~= idReal(3) && kp_list(ii,3) ~= idReal(4) && kp_list(ii,3) ~= idReal(5)
+        fprintf('Removed beacon: %d\n', kp_list(ii,3))
+        kp_list(ii,:) = [];
+    end
+end
 
 %% Remove not complete beacon from kp_list
 tolerance = 5;
