@@ -19,7 +19,7 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
     
     dist2target = sqrt((target(1)-mu(1,1))^2+(target(2)-mu(2,1))^2);
     theta_target = atan2((target(2)-mu(2,1)),(target(1)-mu(1,1))) - mu(3,1);
-    
+    count = 0;
     %% motion loop
     while true
         %% do motion
@@ -27,11 +27,16 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         [delta_d,delta_theta] = do_motionV2(dist2target, theta_target,pb);
         
         %% get sensor data
-        
+        count = count + 1;
         img = flipud(pb.getImageFromCamera());
         img = imrotate(img,-90);
         
-        z = senseless(img);
+        count = count + 1;
+        z = [];
+        if count >= 3
+            z = senseless(img);
+            count =0;
+        end
         
         %% Kalman Filter
         [mu,sigma] = prediction_step(mu,sigma,delta_d,delta_theta);

@@ -125,15 +125,6 @@ end
 
 kp_list = sortrows(kp_list,[1]);
 
-%% remove beacons not in realID list
-
-for ii=1:size(kp_list,1)
-    if kp_list(ii,3) ~= idReal(1) && kp_list(ii,3)~= idReal(2) && kp_list(ii,3) ~= idReal(3) && kp_list(ii,3) ~= idReal(4) && kp_list(ii,3) ~= idReal(5)
-        fprintf('Removed beacon: %d\n', kp_list(ii,3))
-        kp_list(ii,:) = [];
-    end
-end
-
 %% Remove not complete beacon from kp_list
 tolerance = 5;
 %m1 = -0.0210896309314587;
@@ -156,6 +147,10 @@ for ii=1:size(kp_list,1)
         if size(listA,1)>=3
             listA = sortrows(listA,[2]);
             ID = bitshift(listA(1,3),4)+bitshift(listA(2,3),2)+bitshift(listA(3,3),0);
+            if ID ~= idReal(1) && ID ~= idReal(2) && ID ~= idReal(3) && ID ~= idReal(4) && ID ~= idReal(5)
+                listA = [];
+                continue
+            end
             meanX = sum(listA(:,1))/3;
             meanY = sum(listA(:,2))/3;
             distY = listA(3,2)-listA(1,2);

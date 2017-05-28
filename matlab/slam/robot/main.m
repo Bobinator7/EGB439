@@ -11,13 +11,22 @@ idx = [];
 mu = [0;0;0];
 sigma = 0.01*eye(3);
 
+
+target = [0.5;0.5];
+[mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
 % 
-target = [0.25;0.25;deg2rad(-90)];
+target_angle = deg2rad(180); 
+[mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
+target_angle = deg2rad(0);
+[mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
+% 
+target = [0;0];
 [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
 
-
+% target = [0;0];
+% [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
 
 % optional: plotting function coord frame
 
 % TODO: adjust params for motion model
-% TODO: write to_angle function to rotate and SLAM
+
