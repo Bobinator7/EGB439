@@ -50,5 +50,9 @@ end
 
 % optional: plotting function coord frame
 
-% TODO: adjust params for motion model
+% TODO: fix coordinate frame of robot
+% TODO: clean up graph
+% TODO: right better main function (i.e., fully rotate)
+% TODO: plot distress call location
+% TODO: FINISH!!!!!!!
 
