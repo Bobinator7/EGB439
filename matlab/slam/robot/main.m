@@ -11,6 +11,10 @@ idx = [];
 mu = [0;0;0];
 sigma = 0.01*eye(3);
 
+% distress call
+load('map1.mat');
+
+
 
 target = [0.5;0.5];
 [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
@@ -21,7 +25,7 @@ target_angle = deg2rad(0);
 [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
 % 
 if (size(idx,1)==5)
-    distLoc = getDistressCall(map1,mu,idx);
+    distLoc = getDistressCall(map,mu,idx);
     [mu,sigma,idx] = toPoint(pb, distLoc, mu, sigma, idx);
     return
 end
