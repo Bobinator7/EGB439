@@ -11,7 +11,7 @@ end
 
 [~,~,tr] = procrustes(robot_beacons,guy_beacons,'scaling',false,'reflection',false);
 
-T = [tr.T tr.c(1,:)';zeros(1,2) 1];
+T = [tr.T' tr.c(1,:)';zeros(1,2) 1];
     
 
 end
