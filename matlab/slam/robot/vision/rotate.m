@@ -2,7 +2,7 @@ function [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx)
     %% motion control init
     Kv = 0.7;  
     Kh = 1.0;
-    goal_tolerance = 0.2;
+    goal_tolerance = 0.3;
     dt = 0.2;
     vL = 0;
     vR = 0;

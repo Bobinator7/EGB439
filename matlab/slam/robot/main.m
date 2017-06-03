@@ -13,7 +13,7 @@ sigma = 0.01*eye(3);
 
 
 % distress call
-load('map1.mat');
+load('/maps/map2.mat');
 
 disp('rotate 1')
 target_angle = deg2rad(90);

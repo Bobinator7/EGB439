@@ -4,10 +4,11 @@ function [delta_d,delta_theta] = do_motionV2(dist2target, theta_target, pb)
     time = 0.3; %0.2
     acc_time = 0.1;
     ticks_prev = pb.getMotorTicks();
+    p = 40;
      if theta_target > 0 
-        l = -30; r = 30;
+        l = -p; r = p;
      else
-        l = 30; r = -30;
+        l = p; r = -p;
     end
     if abs(theta_target) > ang_tol
         pb.setMotorSpeeds([l r],time,acc_time)
