@@ -1,9 +1,9 @@
 
-%pb = startup_robot('172.19.232.105');
+%pb = startup_robot('192.168.43.154');
 
 %img = getImage;
 %cd ../../..
-img = imread('beaconImage250.jpg');
+%img = imread('beaconImage250.jpg');
 imshow(img);
 %img = pb.getImageFromCamera();
 %img = imrotate(img,-90);

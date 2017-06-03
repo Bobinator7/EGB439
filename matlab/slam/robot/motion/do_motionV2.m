@@ -1,7 +1,8 @@
 function [delta_d,delta_theta] = do_motionV2(dist2target, theta_target, pb)
     ang_tol = 0.2;
     dist_tol = 0.1; %0.1 
-    time = 0.2; %0.2
+    time = 0.3; %0.2
+    acc_time = 0.1;
     ticks_prev = pb.getMotorTicks();
      if theta_target > 0 
         l = -30; r = 30;
@@ -9,10 +10,10 @@ function [delta_d,delta_theta] = do_motionV2(dist2target, theta_target, pb)
         l = 30; r = -30;
     end
     if abs(theta_target) > ang_tol
-        pb.setMotorSpeeds([l r],time)
+        pb.setMotorSpeeds([l r],time,acc_time)
     else
         if dist2target > dist_tol
-            pb.setMotorSpeeds([-50 -50],time);
+            pb.setMotorSpeeds([-50 -50],time,acc_time);
         end
     end
     ticks_next = pb.getMotorTicks();

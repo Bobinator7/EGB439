@@ -55,9 +55,10 @@ allBlueBlobAreas = regionprops(oneB,'all');
 % red loop for find green keypoints
 green = 1 - green; % make green blob 1 and other 0
 greenBlobs = [];
+kdick = 1.02;
 for ii=1:size(allRedBlobAreas,1)
-    idx1 = subplus(round(allRedBlobAreas(ii).Centroid(2)-allRedBlobAreas(ii).MinorAxisLength)) +1;
-    idx2 = subplus(round(allRedBlobAreas(ii).Centroid(2)+allRedBlobAreas(ii).MinorAxisLength)) +1;
+    idx1 = subplus(round(allRedBlobAreas(ii).Centroid(2)-allRedBlobAreas(ii).MinorAxisLength*kdick)) +1;
+    idx2 = subplus(round(allRedBlobAreas(ii).Centroid(2)+allRedBlobAreas(ii).MinorAxisLength*kdick)) +1;
     if idx2 > size(green,1)
         idx2 = size(green,1);
     end
@@ -70,8 +71,8 @@ for ii=1:size(allRedBlobAreas,1)
     %it = i;
 end
 for ii=1:size(allBlueBlobAreas,1)
-    idx3 = subplus(round(allBlueBlobAreas(ii).Centroid(2)-allBlueBlobAreas(ii).MinorAxisLength)) +1;
-    idx4 = subplus(round(allBlueBlobAreas(ii).Centroid(2)+allBlueBlobAreas(ii).MinorAxisLength)) +1;
+    idx3 = subplus(round(allBlueBlobAreas(ii).Centroid(2)-allBlueBlobAreas(ii).MinorAxisLength*kdick)) +1;
+    idx4 = subplus(round(allBlueBlobAreas(ii).Centroid(2)+allBlueBlobAreas(ii).MinorAxisLength*kdick)) +1;
     if idx4 > size(green,1)
         idx4 = size(green,1);
     end
@@ -111,7 +112,7 @@ for it = 1:numel(allRedBlobAreas)
     kp_list = round([kp_list;allRedBlobAreas(it).Centroid, 1, allRedBlobAreas(it).MajorAxisLength]);
 end
 for it = 1:size(greenBlobs,1)
-    kp_list = round([kp_list;[greenBlobs(it,1) greenBlobs(it,2)], 2, 0]); %Centroid for green not known - default 0.
+    kp_list = round([kp_list;[greenBlobs(it,1) greenBlobs(it,2)], 2, 0]); %Area for green not known - default 0.
 end
 for it = 1:numel(allBlueBlobAreas)
     kp_list = round([kp_list;allBlueBlobAreas(it).Centroid, 3, allBlueBlobAreas(it).MajorAxisLength]);
@@ -156,8 +157,8 @@ for ii=1:size(kp_list,1)
             distY = listA(3,2)-listA(1,2);
             ran = m1*(distY)+b1;
             bearing = m2*((meanX-160)/ran)+b2;
-            bearing = deg2rad(bearing)
-            beacon = [ran, bearing, ID];
+            bearing = deg2rad(bearing);
+            beacon = [ran+ 0.17, bearing, ID];
             z = cat(1,z,beacon);
             listB = cat(1,listB,listA);
             listA = [];

@@ -20,6 +20,7 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
     dist2target = sqrt((target(1)-mu(1,1))^2+(target(2)-mu(2,1))^2);
     theta_target = atan2((target(2)-mu(2,1)),(target(1)-mu(1,1))) - mu(3,1);
     count = 0;
+    countT = 0;
     %% motion loop
     while true
         %% do motion
@@ -33,19 +34,30 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         
         count = count + 1;
         z = [];
-        if count >= 3
-            z = senseless(img);
+        if count >= 2
+            z = senseless(img)
             count =0;
         end
         
+        
         %% Kalman Filter
         [mu,sigma] = prediction_step(mu,sigma,delta_d,delta_theta);
-        plot_robot(mu,sigma);
-        plot_beacons(mu,sigma,idx);  
+    
         [mu,sigma,idx] = update_step(mu,sigma,z,idx);
-        plot_robot(mu,sigma);
-        plot_beacons(mu,sigma,idx);  
-                
+        %[mu,sigma,idx] = localize_step(mu,sigma,z,idx);
+        
+        
+        
+%% Plotting
+        countT = countT + 1;
+        
+        if countT >= 10
+            plot_robot(mu,sigma);
+            plot_beacons(mu,sigma,idx); 
+            count =0;
+        end
+        
+        
         %% break when goal is reached & calculate next motion parameters
         dist2target = sqrt((target(1)-mu(1,1))^2+(target(2)-mu(2,1))^2);
         if (dist2target < goal_tolerance)
