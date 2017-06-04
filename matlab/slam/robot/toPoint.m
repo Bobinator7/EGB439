@@ -34,7 +34,7 @@ function [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx)
         
         count = count + 1;
         z = [];
-        if count >= 2
+        if count >= 1
             z = senseless(img)
             count =0;
         end

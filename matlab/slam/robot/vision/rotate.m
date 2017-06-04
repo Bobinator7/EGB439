@@ -33,8 +33,8 @@ function [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx)
         
         z = [];
         count = count + 1;
-        if count >= 3
-            z = senseless(img);
+        if count >= 1
+            z = senseless(img)
             count =0;
         end
         

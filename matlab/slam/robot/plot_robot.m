@@ -4,4 +4,5 @@ function plot_robot(mu,sigma)
     
     plot_pose(mu_);
     plot_cov(mu_(1:2),sigma_(1:2,1:2),3,'b');
+    pause(0.00001);
 end

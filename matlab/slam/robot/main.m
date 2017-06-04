@@ -1,4 +1,5 @@
 %% Test 
+%% NOTE: 57 and 27 are off.
 
 clear;close all;clc;
 
@@ -13,7 +14,7 @@ sigma = 0.01*eye(3);
 
 
 % distress call
-load('/maps/map2.mat');
+load('/maps/map7.mat');
 
 disp('rotate 1')
 target_angle = deg2rad(90);
@@ -28,8 +29,6 @@ disp('translate 1')
 target = [0.5;0.5];
 [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
 
-figure
-plot_robot(mu,sigma); hold on; plot_beacons(mu,sigma,idx)
 % 
 disp('rotate 3')
 target_angle = deg2rad(-90);
@@ -63,31 +62,9 @@ if (size(idx,1)==5)
 
     hold on; plot(distCallLoc(1,1),distCallLoc(2,1),'yx')
     figure;plot_robot(mu,sigma);hold on; plot_beacons(mu,sigma,idx);hold on;plot(distCallLoc(1,1),distCallLoc(2,1),'y*');title('Final Plot')
+    hold on;plot(realLoc.map(3:end,2),realLoc.map(3:end,3),'x');
     return
 end
-
-% target = [1;1.25];
-% [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
-% target_angle = deg2rad(180); 
-% [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
-% target_angle = deg2rad(0);
-% [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
-% 
-% if (size(idx,1)==5)
-%     disp('5 beacons found - 2nd time')
-%     distCallLoc = getDistressCall(map1,mu,idx);
-%     [mu,sigma,idx] = toPoint(pb, distCallLoc, mu, sigma, idx);
-%     hold on; plot(distCallLoc,'x')
-%     return
-% end
-% 
-% target = [1;0.75];
-% [mu,sigma,idx] = toPoint(pb, target, mu, sigma, idx);
-% target_angle = deg2rad(-180); 
-% [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
-% target_angle = deg2rad(0);
-% [mu,sigma,idx] = rotate(pb, target_angle, mu, sigma, idx);
-
 
 disp('shit did not find it')
 

@@ -13,5 +13,6 @@ function plot_beacons(mu,sigma,id)
         text(mu(idx,1),mu(idx+1,1),num2str(id(ii+1)));
         hold on;
         plot_cov(mu(idx:idx+1,1),sigma(idx:idx+1,idx:idx+1),3,'g');
+        pause(0.00001);
     end
 end
