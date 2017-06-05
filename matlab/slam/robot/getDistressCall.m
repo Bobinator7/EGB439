@@ -12,11 +12,11 @@ function call_location = getDistressCall(map,mu,idx)
     robot_beacon = [robot_beacon1;robot_beacon2];
     guys_beacon = map(2:3,2:3);
     
-    T = getTransform(robot_beacon,guys_beacon);
+    tr = getTransform(robot_beacon,guys_beacon);
     
-    distress_in_guy_frame = [map(1,2:3)';1];
+    distress_in_guy_frame = map(1,2:3);
     
-    distress_in_robot_frame = T * distress_in_guy_frame;
+    distress_in_robot_frame = distress_in_guy_frame * tr.T + tr.c(1,:);
     
-    call_location = distress_in_robot_frame(2:3,1);
+    call_location = distress_in_robot_frame;
 end

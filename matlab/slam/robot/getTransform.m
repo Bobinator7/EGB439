@@ -1,4 +1,4 @@
-function T = getTransform(robot_beacons,guy_beacons)
+function tr = getTransform(robot_beacons,guy_beacons)
 % beacons are in the following formatting:
 % robot_beacons = [point1;point2;...]
 % guy_beacons = [point1;point2;...]
@@ -11,7 +11,6 @@ end
 
 [~,~,tr] = procrustes(robot_beacons,guy_beacons,'scaling',false,'reflection',false);
 
-T = [tr.T' tr.c(1,:)';zeros(1,2) 1];
-    
+   
 
 end
