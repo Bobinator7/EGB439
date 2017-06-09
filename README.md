@@ -1,5 +1,6 @@
 # EGB439
 
-Main code for EGB439 penguin project.
+Code for EGB439 penguin project.
 
-Upload code only in library format (no main fcns)
+TODO: 
+* cleanup repo (remove deprecated, archive milestones, seperate python/matlab working code)
